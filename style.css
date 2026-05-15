@@ -107,7 +107,7 @@ body::before {
 
 .sidebar-header h1 {
   font-family: var(--pixel-font);
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   color: var(--gold);
   line-height: 1.6;
   text-shadow: 2px 2px 0 #000;
@@ -116,7 +116,7 @@ body::before {
 
 .sidebar-header .subtitle {
   font-family: var(--pixel-font);
-  font-size: 0.45rem;
+  font-size: 0.5rem;
   color: var(--cyan);
   margin-top: 6px;
   text-shadow: 1px 1px 0 #000;
@@ -136,7 +136,7 @@ body::before {
   color: var(--text-dim);
   text-decoration: none;
   font-family: var(--pixel-font);
-  font-size: 0.45rem;
+  font-size: 0.5rem;
   transition: all 0.15s;
   border-left: 4px solid transparent;
   margin: 1px 0;
@@ -200,7 +200,7 @@ body::before {
 
 .page-header h2 {
   font-family: var(--pixel-font);
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   color: var(--gold);
   text-shadow: 3px 3px 0 #000;
   line-height: 1.8;
@@ -209,7 +209,7 @@ body::before {
 
 .page-header .tagline {
   font-family: var(--pixel-font);
-  font-size: 0.4rem;
+  font-size: 0.5rem;
   color: var(--cyan);
   text-align: center;
   margin-top: 8px;
@@ -235,7 +235,7 @@ body::before {
 
 .section-num {
   font-family: var(--pixel-font);
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--orange);
   text-shadow: 2px 2px 0 #000;
   min-width: 36px;
@@ -244,7 +244,7 @@ body::before {
 
 .section-header h3 {
   font-family: var(--pixel-font);
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   color: var(--gold);
   text-shadow: 2px 2px 0 #000;
   line-height: 1.5;
@@ -530,13 +530,13 @@ blockquote strong {
   }
 
   .page-header h2 {
-    font-size: 0.5rem;
+    font-size: 0.6rem;
   }
 }
 
 @media (max-width: 480px) {
   pre { font-size: 0.6rem; padding: 10px; }
-  .section-header h3 { font-size: 0.5rem; }
+  .section-header h3 { font-size: 0.55rem; }
   .sidebar-nav li a { font-size: 0.55rem; }
 }
 
