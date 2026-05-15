@@ -456,40 +456,51 @@ blockquote strong {
 }
 
 .footer-heart {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
   color: var(--red);
-  margin-bottom: 4px;
+  font-size: 0.5rem;
+  margin-bottom: 8px;
 }
 
-/* Pixel heart — 8x8 CSS box-shadow grid */
+/* Pixel heart — 6x5 grid at 8px per cell */
 .pixel-heart {
   display: inline-block;
   width: 8px;
   height: 8px;
   background: var(--red);
   box-shadow:
+    8px 0px 0 var(--red),
+    32px 0px 0 var(--red),
     0px 8px 0 var(--red),
+    8px 8px 0 var(--red),
+    16px 8px 0 var(--red),
+    24px 8px 0 var(--red),
+    32px 8px 0 var(--red),
+    40px 8px 0 var(--red),
     0px 16px 0 var(--red),
     8px 16px 0 var(--red),
-    16px 8px 0 var(--red),
     16px 16px 0 var(--red),
-    24px 0px 0 var(--red),
-    24px 8px 0 var(--red),
     24px 16px 0 var(--red),
-    32px 0px 0 var(--red),
-    40px 0px 0 var(--red),
-    48px 0px 0 var(--red),
-    56px 0px 0 var(--red),
-    8px 0px 0 var(--red),
-    16px 0px 0 var(--red),
-    48px 8px 0 var(--red),
-    56px 8px 0 var(--red),
-    56px 16px 0 var(--red);
+    32px 16px 0 var(--red),
+    40px 16px 0 var(--red),
+    8px 24px 0 var(--red),
+    16px 24px 0 var(--red),
+    24px 24px 0 var(--red),
+    32px 24px 0 var(--red),
+    16px 32px 0 var(--red),
+    24px 32px 0 var(--red);
   image-rendering: pixelated;
-  margin-right: 2px;
   vertical-align: middle;
+  margin-right: 4px;
+  animation: heartPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes heartPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
 }
 
 /* ============================================
