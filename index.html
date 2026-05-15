@@ -1,0 +1,318 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devvit for Noobs — Build Apps on Reddit</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>DEVVIT<br>FOR<br>NOOBS</h1>
+    <div class="subtitle">build apps on reddit</div>
+  </div>
+  <ul class="sidebar-nav">
+    <li><a href="#hero" class="active"><span class="nav-num">00</span>Home</a></li>
+    <li><a href="#what"><span class="nav-num">01</span>What You Can Build</a></li>
+    <li><a href="#first-app"><span class="nav-num">02</span>First App in 5 Min</a></li>
+    <li><a href="#ingredients"><span class="nav-num">03</span>Magic Ingredients</a></li>
+    <li><a href="#patterns"><span class="nav-num">04</span>Real Patterns</a></li>
+    <li><a href="#gotchas"><span class="nav-num">05</span>Wish I Knew Sooner</a></li>
+    <li><a href="#spotlight"><span class="nav-num">06</span>Community Spotlight</a></li>
+    <li><a href="#next"><span class="nav-num">07</span>What's Next</a></li>
+  </ul>
+  <div class="sidebar-footer">github.com/you/devvit-for-noobs</div>
+</nav>
+
+<!-- MOBILE TOGGLE -->
+<button class="mobile-nav-toggle" id="nav-toggle">[ MENU ]</button>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- HERO -->
+<div class="section" id="hero">
+  <div class="page-header">
+    <h2>DEVVIT<br>FOR NOOBS</h2>
+    <div class="tagline">Build apps that live inside Reddit. No, seriously.</div>
+  </div>
+  <p>You know those interactive posts you see on Reddit? The games people play inside a thread? The mod tools that auto-remove spam? Those are <strong>Devvit apps</strong> — and you can build one too. In about 5 minutes. With zero server costs. For free.</p>
+  <p>This guide was made by someone who figured it out the hard way so you don't have to. Grab a drink, scroll down, and let's build something cool.</p>
+</div>
+
+<!-- SECTION 1: WHAT CAN YOU BUILD -->
+<div class="section" id="what">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h3>What Can You Build?</h3>
+  </div>
+  <p>Devvit gives you <strong>free hosted apps on Reddit</strong>. Your code runs on Reddit's servers. Users never leave the platform. Here's what people are actually building:</p>
+
+  <div class="warn-box" style="margin-top:16px;">
+    <div class="warn-title">> GAMES</div>
+    <p><strong>Hot and Cold</strong> — a daily guessing game with 50,000+ players. <strong>Pixelary</strong> — draw something, Reddit guesses. <strong>Blokkit</strong> — a full Unity game running in a Reddit post. If you can build it for the web, you can put it on Reddit.</p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> MOD TOOLS</div>
+    <p>Auto-remove comments that don't match flair. Detect ban evasion. Forward modmail to Discord. Build a dashboard that saves mods hours every week. <strong>Community mods install these with one click.</strong></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> COMMUNITY APPS</div>
+    <p>Event meetup managers. Community surveys. Leaderboards. Daily discussion threads. AMA schedulers. <strong>If a subreddit needs it, you can build it.</strong></p>
+  </div>
+
+  <p style="margin-top:16px;">And Reddit <strong>pays developers</strong> through the Reddit Developer Fund — up to $167,000 per app based on engagement. Yeah, really.</p>
+</div>
+
+<!-- SECTION 2: FIRST APP IN 5 MINUTES -->
+<div class="section" id="first-app">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h3>Your First App in 5 Minutes</h3>
+  </div>
+
+  <p><strong>Step 1:</strong> Install Node.js (v22+) then open your terminal:</p>
+<pre><code>npm install -g @devvit/cli
+# On Windows, the command is "devvit-cli" not "devvit"
+devvit-cli --version</code></pre>
+
+  <p><strong>Step 2:</strong> Create your app. Pick "React" for games, "Bare" for mod tools.</p>
+<pre><code>devvit-cli init
+# Follow the browser OAuth flow — code auto-captures</code></pre>
+
+  <p><strong>Step 3:</strong> Start the dev server. Reddit auto-creates a test subreddit for you.</p>
+<pre><code>cd my-app
+npm run dev</code></pre>
+
+  <p>You'll see a URL like <code>reddit.com/r/my-app_dev/?playtest=my-app</code>. Open it. Your app is running. On Reddit. Right now.</p>
+
+  <div class="note-box">
+    <div class="note-title">> THE GOLDEN RULE</div>
+    <p>Every time you upload changes, go to <strong>developers.reddit.com/apps/your-app-name</strong> and click the blue <strong>"Update"</strong> button under "My Installations." If you skip this, your test subreddit runs the old version and you'll wonder why nothing changed for 20 minutes. Ask me how I know.</p>
+  </div>
+</div>
+
+
+<!-- SECTION 3: THE MAGIC INGREDIENTS -->
+<div class="section" id="ingredients">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h3>The Magic Ingredients</h3>
+  </div>
+  <p>Every Devvit app has three superpowers. Here's what they do — no jargon, just the real stuff:</p>
+
+  <div class="warn-box">
+    <div class="warn-title">> REDIS — Your Database (Free!)</div>
+    <p>Redis is a lightning-fast key-value store. Think of it like a giant <code>Map&lt;String, anything&gt;</code> that survives restarts. Store scores, user data, settings, whatever. Reddit gives you Redis for free — no setup, no bills.</p>
+<pre><code>import { redis } from "@devvit/web/server";
+
+// Save a score
+await redis.zAdd("highscores", { member: "u/coolguy", score: 9001 });
+
+// Get the top 10
+const top10 = await redis.zRange("highscores", 0, 9, { by: "rank" });</code></pre>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> TRIGGERS — When Stuff Happens</div>
+    <p>Triggers are the "when X happens, do Y" of Reddit. New comment? Trigger fires. Mod takes an action? Trigger fires. App gets installed? Trigger fires. You just write the "what to do" part.</p>
+<pre><code>// Auto-respond to every new comment (don't actually do this)
+Devvit.addTrigger({
+  event: "CommentSubmit",
+  onEvent: async (event, context) => {
+    console.log("Someone said: " + event.comment.body);
+    // DO SOMETHING COOL HERE
+  }
+});</code></pre>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> SCHEDULER — The Time Machine</div>
+    <p>Need something to run every hour? Every day at 9 AM? The scheduler handles it. But here's the thing nobody tells you: <strong>CRON jobs work. One-shot jobs don't (in inline mode).</strong> Use CRON for everything.</p>
+<pre><code>// In devvit.json — this runs every 5 minutes, FOREVER
+"scheduler": {
+  "tasks": {
+    "check-reminders": {
+      "endpoint": "/internal/scheduler/check-reminders",
+      "cron": "*/5 * * * *"
+    }
+  }
+}</code></pre>
+  </div>
+</div>
+
+<!-- SECTION 4: REAL PATTERNS FROM REAL DEVS -->
+<div class="section" id="patterns">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h3>Battle-Tested Patterns from Real Devs</h3>
+  </div>
+  <p>These patterns came from analyzing 30+ production Devvit apps. They solve the problems you'll actually hit.</p>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 1: The Hybrid Backend</h4>
+  <p><em>Used by: Meetit (event manager), Microlympics</em></p>
+  <p>Your beautiful UI lives in Devvit Web (HTML/CSS/JS in an iframe). But background tasks — sending reminders, cleaning up old data, creating daily posts — run through <strong>CRON jobs</strong> that operate server-side, outside the iframe. Both share data through Redis.</p>
+<pre><code>// Your UI handles user interactions
+app.get("/api/rsvp", async (req, res) => {
+  await redis.zAdd("rsvps:event123", { member: username, score: Date.now() });
+});
+
+// A CRON job handles the boring stuff every 5 minutes
+// /internal/scheduler/send-reminders
+const now = Date.now();
+const events = await redis.hGetAll("events");
+for (const [id, data] of Object.entries(events)) {
+  if (data.reminderTime < now && !(await redis.exists("reminded:" + id))) {
+    await redis.set("reminded:" + id, "true", { expiration: 86400 });
+    // Send the reminder...
+  }
+}</code></pre>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 2: The Webhook Dispatcher</h4>
+  <p><em>Used by: Modmail-to-Discord, Admin Tattler, Mod Mentions</em></p>
+  <p>Use the URL itself to figure out where to send things. No separate "platform" setting needed. Slack URLs start with <code>hooks.slack.com</code>, Discord with <code>discord.com/api/webhooks</code>. Build the right payload for each and fire them all independently.</p>
+<pre><code>async function notify(webhookUrl, message) {
+  let payload;
+  if (webhookUrl.startsWith("https://hooks.slack.com/")) {
+    payload = { text: "*Alert:* " + message };  // Slack MRKDWN
+  } else if (webhookUrl.includes("discord.com/api/webhooks")) {
+    payload = { embeds: [{ title: "Alert", description: message, color: 16729344 }] };
+  }
+  await fetch(webhookUrl, { method: "POST", body: JSON.stringify(payload) });
+}</code></pre>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 3: Cache the Modlist</h4>
+  <p><em>Used by: Only-Flairs, Mod Mentions, Admin Tattler</em></p>
+  <p>Calling <code>getModerators()</code> on every single comment trigger is crazy slow. Instead, cache the modlist as a comma-separated string in Redis. Invalidate the cache when mods are added/removed.</p>
+<pre><code>// On AppInstall or ModAction: cache the modlist
+const mods = await subreddit.getModerators({ pageSize: 500 }).all();
+await redis.set("mods", mods.map(m => m.username).join(","));
+
+// On CommentSubmit: check in O(1)
+const isMod = (await redis.get("mods")).split(",").includes(authorName);</code></pre>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 4: Mobile Forms That Actually Work</h4>
+  <p><em>Used by: Meetit, Community Survey</em></p>
+  <p>Inline Devvit webviews CANNOT scroll internally on the mobile Reddit app. Content taller than the viewport gets clipped and users can't reach the bottom. Solution: break every form into steps with <strong>max 2 fields per step</strong>. Add floating scroll arrows as a backup.</p>
+<pre><code>// HTML pattern: multi-step overlay
+&lt;div class="overlay" id="form-overlay"&gt;
+  &lt;div class="overlay-body" id="step-1"&gt;
+    &lt;input placeholder="Title"&gt;
+    &lt;input placeholder="Organizer"&gt;
+  &lt;/div&gt;
+  &lt;div class="overlay-body hidden" id="step-2"&gt;
+    &lt;input type="date"&gt;
+    &lt;input type="time"&gt;
+  &lt;/div&gt;
+  &lt;div class="overlay-footer"&gt;
+    &lt;button class="btn-prev"&gt;Back&lt;/button&gt;
+    &lt;button class="btn-next"&gt;Next&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+</div>
+
+
+<!-- SECTION 5: STUFF I WISH I KNEW SOONER -->
+<div class="section" id="gotchas">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h3>Stuff I Wish I Knew Sooner</h3>
+  </div>
+  <p>The things that will save you hours of debugging. Learn from my pain.</p>
+
+  <table class="pixel-table ref-table do">
+    <tr><th style="color:var(--green);">DO THIS</th><th style="color:var(--red);">NOT THIS</th></tr>
+    <tr><td>Use <code>addEventListener</code> for all button clicks</td><td>Use <code>onclick="fn()"</code> — blocked by CSP, silently fails</td></tr>
+    <tr><td>Use CRON scheduler for ALL background tasks</td><td>Use one-shot <code>scheduler.runJob()</code> — never fires in inline mode</td></tr>
+    <tr><td>Pass key to <code>settings.get("key")</code></td><td>Call <code>settings.get()</code> without args — returns undefined</td></tr>
+    <tr><td>Check <code>!= null</code> for zScore results</td><td>Use <code>!== null</code> — zScore returns undefined, not null</td></tr>
+    <tr><td>Break forms into steps (max 2 fields each)</td><td>Build a long single form — mobile inline webviews can't scroll</td></tr>
+    <tr><td>Click "Update" on developer portal after upload</td><td>Assume upload auto-updates — it doesn't, old code keeps running</td></tr>
+    <tr><td>Cache modlist as CSV string in Redis</td><td>Call <code>getModerators()</code> on every trigger — way too slow</td></tr>
+    <tr><td>Use <code>addEventListener</code> after every innerHTML change</td><td>Assume event listeners survive <code>innerHTML = ...</code> — they don't</td></tr>
+    <tr><td>Build server as CJS, client as ESM</td><td>Use the same module format for both — Devvit requires CJS server</td></tr>
+    <tr><td>Include fallback HTML for instant rendering</td><td>Wait for API response before showing anything — users see blank screen</td></tr>
+  </table>
+
+  <div class="warn-box" style="margin-top:16px;">
+    <div class="warn-title">> THE SNEAKIEST BUG</div>
+    <p>Redis writes can be <strong>eventually consistent</strong>. You call <code>zRem</code>, it returns 0, you panic. But the member IS removed — the read right after the write might show stale data. <strong>Trust the write. Don't verify immediately.</strong> Read again 1 second later and it'll be correct.</p>
+  </div>
+</div>
+
+<!-- SECTION 6: COMMUNITY SPOTLIGHT -->
+<div class="section" id="spotlight">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h3>Community Spotlight</h3>
+  </div>
+  <p>Real apps built by real devs. All open source. Go steal their ideas (respectfully).</p>
+
+  <div class="warn-box">
+    <div class="warn-title">> HOT AND COLD</div>
+    <p>A daily number-guessing game with leaderboards, streaks, and 50k+ players. Built with React + Express + tRPC. <strong>Pattern to steal:</strong> Redis sorted sets for leaderboards, PostHog for analytics, tRPC for type-safe API calls from the game client.</p>
+    <p><a href="https://github.com/reddit/devvit-HotAndCold" target="_blank">github.com/reddit/devvit-HotAndCold</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> BOT BOUNCER</div>
+    <p>The most sophisticated mod tool on Devvit — detects spam accounts across 1000+ subreddits. Uses self-chaining cron jobs, sharded Redis, compressed payloads, and a wiki-based config system. <strong>Pattern to steal:</strong> Self-chaining job pattern, randomized cron minutes, ZSET queues.</p>
+    <p><a href="https://github.com/fsvreddit/bot-bouncer" target="_blank">github.com/fsvreddit/bot-bouncer</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> MODMAIL TO DISCORD/SLACK</div>
+    <p>A 160-line single-file app that forwards modmail to webhooks. Proof that useful apps don't need to be complex. <strong>Pattern to steal:</strong> URL-as-platform-discriminator, single-field multi-platform dispatch.</p>
+    <p><a href="https://github.com/ni5arga/Modmail-To-Discord-Slack" target="_blank">github.com/ni5arga/Modmail-To-Discord-Slack</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> BLOCKKIT & PIXELARY</div>
+    <p>Full Unity and HTML5 games running inside Reddit posts. Proof that Devvit can handle real games. Blokkit runs Unity WebGL. Pixelary is a draw-and-guess game. Both have thousands of daily players.</p>
+    <p><a href="https://www.reddit.com/r/Blokkit/" target="_blank">r/Blokkit</a> &middot; <a href="https://www.reddit.com/r/Pixelary/" target="_blank">r/Pixelary</a></p>
+  </div>
+</div>
+
+<!-- SECTION 7: WHAT'S NEXT -->
+<div class="section" id="next">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h3>What's Next?</h3>
+  </div>
+
+  <p>You now know enough to build something real. Here's your launch sequence:</p>
+
+  <p><strong>1. Pick an idea.</strong> Start small. A bot that forwards modmail to Discord. A daily thread creator. A simple leaderboard game. Ship something in a weekend.</p>
+
+  <p><strong>2. Use the skills file.</strong> The <code>skills.md</code> file in this repo is your AI agent's reference manual. Feed it to opencode, Claude Code, or Cursor. It contains every pattern, gotcha, and code template you'll need. Your AI assistant becomes a Devvit expert instantly.</p>
+
+  <p><strong>3. Join the community.</strong> The <a href="https://www.reddit.com/r/devvit/" target="_blank">r/devvit</a> subreddit and the <a href="https://developers.reddit.com/discord" target="_blank">Devvit Discord</a> are full of devs who've shipped. They'll help you debug, review your code, and celebrate your launch.</p>
+
+  <p><strong>4. Design with Stitch.</strong> Use Google Stitch (integrated with opencode) to generate pixel-perfect UIs. Describe what you want — "a game dashboard with neon header and card layout" — and Stitch builds the HTML/CSS. Drop it into your project.</p>
+
+  <p><strong>5. Publish and earn.</strong> When your app is ready, <code>npx devvit publish</code> submits it for review. Once approved, mods can install it. If it gets engagement, you might qualify for the <strong>Reddit Developer Fund</strong> (up to $167k per app).</p>
+
+  <div class="note-box" style="margin-top:20px;">
+    <div class="note-title">> REMEMBER</div>
+    <p>Every advanced Devvit developer started exactly where you are now. The only difference is they shipped. So ship something. Even if it's tiny. Even if it's ugly. <strong>Put code on Reddit and see what happens.</strong></p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <p>DEVVIT FOR NOOBS</p>
+  <p>Built with pixel love. Not affiliated with Reddit.</p>
+  <p><a href="skills.md">skills.md</a> for AI agents &middot; <a href="https://github.com">GitHub</a></p>
+</footer>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
