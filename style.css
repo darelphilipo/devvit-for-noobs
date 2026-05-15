@@ -451,6 +451,47 @@ blockquote strong {
   text-decoration: none;
 }
 
+.page-footer a:hover {
+  color: var(--gold);
+}
+
+.footer-heart {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--red);
+  margin-bottom: 4px;
+}
+
+/* Pixel heart — 8x8 CSS box-shadow grid */
+.pixel-heart {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--red);
+  box-shadow:
+    0px 8px 0 var(--red),
+    0px 16px 0 var(--red),
+    8px 16px 0 var(--red),
+    16px 8px 0 var(--red),
+    16px 16px 0 var(--red),
+    24px 0px 0 var(--red),
+    24px 8px 0 var(--red),
+    24px 16px 0 var(--red),
+    32px 0px 0 var(--red),
+    40px 0px 0 var(--red),
+    48px 0px 0 var(--red),
+    56px 0px 0 var(--red),
+    8px 0px 0 var(--red),
+    16px 0px 0 var(--red),
+    48px 8px 0 var(--red),
+    56px 8px 0 var(--red),
+    56px 16px 0 var(--red);
+  image-rendering: pixelated;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
 /* ============================================
    MOBILE HAMBURGER
    ============================================ */
