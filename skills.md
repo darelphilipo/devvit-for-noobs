@@ -272,6 +272,55 @@ if (bannedUsers.length > 0) {
 - **Hono**: Used in React template, lighter weight
 - **tRPC**: Used in HotAndCold for type-safe RPC over `/api`
 
+### Recommended Libraries (Production Stack from Community Chats)
+This is the stack Reddit's own Community Chats app uses — production-grade, works on Devvit Web:
+```json
+{
+  "dependencies": {
+    "@devvit/start": "0.12.x",    // Vite plugin + Devvit tooling
+    "@devvit/web": "0.12.x",      // Server + Client APIs
+    "hono": "^4",                 // Lightweight HTTP framework (over Express)
+    "react": "19.x",              // UI framework
+    "react-dom": "19.x",
+    "tailwindcss": "4.x",         // CSS framework (v4 — CSS-first config, no tailwind.config)
+    "@tailwindcss/vite": "4.x",   // Tailwind Vite plugin
+    "framer-motion": "^12",       // Animations (spring physics, layout transitions)
+    "lucide-react": "^1",         // Icon library (tree-shakeable)
+    "clsx": "^2",                 // Conditional classnames
+    "tailwind-merge": "^3"        // Merge Tailwind classes without conflicts
+  },
+  "devDependencies": {
+    "typescript": "5.x || 6.x",
+    "vite": "5.x || 8.x",
+    "@vitejs/plugin-react": "^6",
+    "eslint": "^10",
+    "prettier": "^3",
+    "prettier-plugin-tailwindcss": "^0.8"
+  }
+}
+```
+| Library | Why | Notes |
+|---------|-----|-------|
+| **Hono** over Express | Lighter, faster, better TS support | Express also works fine |
+| **Tailwind 4** | CSS-first config via `@theme`, no JS config file | Use `@tailwindcss/vite` plugin |
+| **Framer Motion** | Spring animations, `AnimatePresence` for exit animations | Adds ~30KB to bundle |
+| **Lucide React** | Tree-shakeable icons, consistent pixel-perfect sizing | Import only icons you use |
+| **clsx + tailwind-merge** | Conditional classes without style conflicts | Standard combo in Tailwind apps |
+
+### Devvit-Specific Imports
+```typescript
+// Server (src/server/) — available as magical imports
+import { context, redis, reddit } from '@devvit/web/server';
+import type { UiResponse, TriggerResponse } from '@devvit/web/shared';
+
+// Client (src/client/) — browser-safe Devvit APIs
+import { getWebViewMode, requestExpandedMode, showForm, showToast, navigateTo } from '@devvit/web/client';
+
+// Build tooling
+import { devvit } from '@devvit/start/vite';  // Vite plugin
+import { getServerPort, createServer } from '@devvit/web/server';  // Server boot
+```
+
 ## 5. Redis Patterns
 
 ### Basic Operations

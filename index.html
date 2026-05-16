@@ -237,6 +237,11 @@ const sync = useCallback(async () => {
 setInterval(sync, 3000);</code></pre>
   <p><strong>Bonus:</strong> Every chat message is posted as a real Reddit comment (using <code>runAs: 'USER'</code>). This means AutoModerator, ban detection, and subreddit rules all apply automatically.</p>
 
+  <div class="note-box" style="margin-top:20px;">
+    <div class="note-title">> PRODUCTION STACK (use these)</div>
+    <p>The official Reddit Community Chats app uses: <strong>React 19 + Tailwind CSS 4 + Hono + Framer Motion + Lucide Icons</strong>. This stack is proven to work on Devvit Web. Skip Express for new projects — Hono is lighter and has better TypeScript support. Use Tailwind 4 (CSS-first config, no <code>tailwind.config.js</code>). Animate everything with Framer Motion — it makes your app feel native.</p>
+  </div>
+
 </div>
 
 
