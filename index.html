@@ -19,6 +19,7 @@
     <li><a href="#what"><span class="nav-num">01</span>What You Can Build</a></li>
     <li><a href="#first-app"><span class="nav-num">02</span>First App in 5 Min</a></li>
     <li><a href="#ingredients"><span class="nav-num">03</span>Magic Ingredients</a></li>
+    <li><a href="#libraries"><span class="nav-num">03</span>Libraries to Use</a></li>
     <li><a href="#patterns"><span class="nav-num">04</span>Real Patterns</a></li>
     <li><a href="#gotchas"><span class="nav-num">05</span>Wish I Knew Sooner</a></li>
     <li><a href="#spotlight"><span class="nav-num">06</span>Community Spotlight</a></li>
@@ -143,6 +144,51 @@ Devvit.addTrigger({
     }
   }
 }</code></pre>
+  </div>
+</div>
+
+<!-- SECTION 3.5: LIBRARIES TO USE -->
+<div class="section" id="libraries">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h3>Libraries: What Real Devs Actually Use</h3>
+  </div>
+  <p>Don't guess what to install. Here's what the most popular production apps use (extracted from 30+ repos):</p>
+
+  <div class="warn-box">
+    <div class="warn-title">> THE BIG DECISION: @devvit/web vs @devvit/public-api</div>
+    <p><strong>Use <code>@devvit/web</code> for:</strong> Games, community apps, surveys, anything with a real UI. This is the modern path. You get HTML/CSS/JS in an iframe + Express/Hono backend + Redis. It's what Reddit recommends for new apps.</p>
+    <p><strong>Use <code>@devvit/public-api</code> for:</strong> Mod tools, bots, simple automations. These apps run trigger-based logic ("when someone comments, do X") and don't need a fancy UI. Lighter weight, simpler to deploy.</p>
+    <p><em>Community Chats, HotAndCold, Microlympics all use <code>@devvit/web</code>. Only-Flairs, Mod-Mentions, Admin-Tattler use <code>@devvit/public-api</code>.</em></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> MODERN WEB APP STACK (recommended)</div>
+    <p><strong>React 19</strong> + <strong>Tailwind CSS 4</strong> + <strong>Hono</strong> + <strong>Framer Motion</strong> + <strong>Lucide React</strong></p>
+    <p>This is the exact stack Reddit's own Community Chats app uses. Tailwind 4 uses CSS-first config (no <code>tailwind.config.js</code> needed). Hono replaces Express — it's lighter, faster, and has better TypeScript support. Framer Motion makes everything feel alive. Lucide gives you pixel-perfect icons.</p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> UNIVERSAL UTILITIES (every repo uses these)</div>
+    <table class="pixel-table" style="margin:12px 0;font-size:0.75rem;">
+      <tr><th>Library</th><th>What it does</th><th>Used by</th></tr>
+      <tr><td><code>date-fns</code></td><td>Date math (addSeconds, subDays, format)</td><td>Bot Bouncer, Sub Stats, AutoModMail</td></tr>
+      <tr><td><code>vitest</code></td><td>Testing framework</td><td>Literally every repo</td></tr>
+      <tr><td><code>pako</code></td><td>Compression for Redis payloads</td><td>Bot Bouncer, Toolbox</td></tr>
+      <tr><td><code>json2md</code></td><td>Convert JSON to markdown for modmail</td><td>Bot Bouncer, AutoModMail</td></tr>
+      <tr><td><code>lodash</code></td><td>Utilities (chunk, compact, merge)</td><td>Bot Bouncer, Sub Stats</td></tr>
+      <tr><td><code>ajv</code></td><td>JSON Schema validation</td><td>Bot Bouncer, AutoModMail</td></tr>
+    </table>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> GAME ENGINES</div>
+    <p><strong>Phaser</strong> for 2D games (Pixelary uses this). <strong>Three.js</strong> for 3D. <strong>Unity WebGL</strong> for complex games (Blokkit, Avatar Arena). Each has an official Devvit starter template.</p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> AI / ADVANCED FEATURES</div>
+    <p>HotAndCold uses <strong>OpenAI</strong> + <strong>Google Gemini</strong> for content generation. Bot Bouncer uses <strong>redos-detector</strong> to prevent regex attacks. If you need vector search, <strong>sqlite-vec</strong> works inside Devvit.</p>
   </div>
 </div>
 
