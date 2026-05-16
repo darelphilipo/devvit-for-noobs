@@ -217,6 +217,28 @@ const isMod = (await redis.get("mods")).split(",").includes(authorName);</code><
 
 </div>
 
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 5: Real-Time Chat with Polling</h4>
+  <p><em>Used by: Community Chats (official Reddit app)</em></p>
+  <p>You don't need WebSockets for real-time chat on Reddit. The official Community Chats app uses <strong>HTTP polling every 3 seconds</strong> with sorted sets in Redis. Each message is also a real Reddit comment — so AutoModerator and other mod tools work automatically.</p>
+<pre><code>// Store messages in a sorted set (timestamp = score, capped at 200)
+await redis.zAdd("chat:" + postId, { member: JSON.stringify(msg), score: Date.now() });
+
+// Poll for new messages since last sync
+const newMsgs = await redis.zRange("chat:" + postId, lastSync + 1, Infinity, { by: "score" });
+
+// Prevent overlapping polls with a ref guard
+const pollingRef = useRef(false);
+const sync = useCallback(async () => {
+  if (pollingRef.current) return;  // Skip if previous still in-flight
+  pollingRef.current = true;
+  await fetch("/api/sync?lastSync=" + lastSync);
+  pollingRef.current = false;
+}, []);
+setInterval(sync, 3000);</code></pre>
+  <p><strong>Bonus:</strong> Every chat message is posted as a real Reddit comment (using <code>runAs: 'USER'</code>). This means AutoModerator, ban detection, and subreddit rules all apply automatically.</p>
+
+</div>
+
 
 <!-- SECTION 5: STUFF I WISH I KNEW SOONER -->
 <div class="section" id="gotchas">

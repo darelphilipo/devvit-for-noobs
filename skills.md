@@ -236,6 +236,37 @@ packages/
 - `scheduler.on("name", handler)` - Does not exist; use endpoint-based scheduler instead
 - `settings.get()` without args - Returns undefined; always pass key
 
+### UiResponse Pattern — Server Returns Declarative UI (Community Chats)
+Instead of client-side routing, the server returns `UiResponse` objects. The Devvit platform renders the UI:
+```typescript
+// Server returns what the platform should show
+if (!isMod) {
+  return c.json<UiResponse>({ showToast: { text: "Mods only.", appearance: "neutral" } });
+}
+return c.json<UiResponse>({
+  showForm: { name: 'myForm', form: { fields: [{ type: 'string', name: 'title', required: true }] } }
+});
+// Or navigate: { navigateTo: 'https://reddit.com/r/...' }
+```
+Types: `showToast`, `showForm`, `navigateTo` — all declarative. The platform handles rendering.
+
+### getModPermissionsForSubreddit() — Reliable Mod Detection (Community Chats)
+More reliable than `getModerators()` in Devvit Web inline context:
+```typescript
+const user = await reddit.getCurrentUser();
+const perms = await user.getModPermissionsForSubreddit(subredditName);
+const isModerator = perms && perms.length > 0;
+```
+Cache result in Redis with 1-minute TTL to avoid calling on every request.
+
+### Ban Detection on Every Message (Community Chats)
+```typescript
+const bannedUsers = await subreddit.getBannedUsers({ username }).all();
+if (bannedUsers.length > 0) {
+  return c.json({ status: 'error', message: 'You are banned.' }, 403);
+}
+```
+
 ### Server Frameworks
 - **Express**: Most common, manual routing with `express.Router()`
 - **Hono**: Used in React template, lighter weight
@@ -370,6 +401,28 @@ await txn.multi();
 await txn.hSet('users', { [username]: JSON.stringify(data) });
 await txn.zAdd('scores', { member: username, score: data.score });
 await txn.exec();
+```
+
+**14. Distributed Lock with hSetNX** (Community Chats)
+Prevent race conditions when multiple server instances try to create a shared resource:
+```typescript
+const lockAcquired = await redis.hSetNX('chat_thread_lock', postId, 'true');
+if (lockAcquired === 1) {
+  await redis.expire('chat_thread_lock', 15); // 15s TTL prevents deadlock
+  await createParentComment();
+}
+```
+
+**15. Message Sorted Sets for Real-Time Chat** (Community Chats)
+Store chat messages as sorted sets with timestamp scores, capped for memory:
+```typescript
+await redis.zAdd(`chat:${postId}`, { member: JSON.stringify(msg), score: Date.now() });
+const chatSize = await redis.zCard(`chat:${postId}`);
+if (chatSize > 200) {
+  await redis.zRemRangeByRank(`chat:${postId}`, 0, chatSize - 201); // Keep latest 200
+}
+// Poll for new messages since last sync:
+const newMsgs = await redis.zRange(`chat:${postId}`, lastSync + 1, Infinity, { by: 'score' });
 ```
 
 ---
@@ -995,10 +1048,56 @@ Email/phone/contact data ONLY shown in Mod Dashboard. Public view shows only Red
 Always include default content in HTML so UI renders instantly:
 ```html
 <div id="content">
-  <!-- Default visible immediately -->
   <div class="event-card"><h3>Loading events...</h3></div>
-  <!-- Live data replaces this when API responds -->
 </div>
+```
+
+### Real-Time Polling with Overlap Guard (Community Chats)
+Polling every 3 seconds with a ref guard to prevent overlapping requests:
+```typescript
+const pollingRef = useRef(false);
+const sync = useCallback(async () => {
+  if (pollingRef.current) return; // Skip if previous poll still in-flight
+  pollingRef.current = true;
+  const res = await fetch(`/api/sync?lastSync=${lastSync}`);
+  pollingRef.current = false;
+  // Merge new messages, update state
+}, []);
+
+useEffect(() => {
+  const interval = setInterval(sync, 3000);
+  return () => clearInterval(interval);
+}, []);
+```
+
+### Optimistic Updates (Community Chats)
+Update UI immediately, roll back on error:
+```typescript
+const sendMessage = async (text: string) => {
+  const optimistic = { id: `opt-${Date.now()}`, text, author: username };
+  setMessages(prev => [...prev, optimistic]); // Show instantly
+  try {
+    const res = await fetch('/api/message', { method: 'POST', body: JSON.stringify({ text }) });
+    const real = await res.json();
+    setMessages(prev => prev.map(m => m.id === optimistic.id ? real : m)); // Replace with real
+  } catch {
+    setMessages(prev => prev.filter(m => m.id !== optimistic.id)); // Roll back
+  }
+};
+```
+
+### Devvit Forms for Client-Side Interactions (Community Chats)
+Use `showForm()` from `@devvit/web/client` instead of building custom HTML forms:
+```typescript
+import { showForm } from '@devvit/web/client';
+const result = await showForm({
+  title: 'Upload Image',
+  fields: [{ name: 'myImage', type: 'image', label: 'Select Image', required: true }],
+  acceptLabel: 'Send',
+});
+if (result.action === 'SUBMITTED') {
+  await sendMessage(result.values.myImage as string);
+}
 ```
 
 ---
