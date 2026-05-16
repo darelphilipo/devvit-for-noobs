@@ -307,6 +307,64 @@ This is the stack Reddit's own Community Chats app uses — production-grade, wo
 | **Lucide React** | Tree-shakeable icons, consistent pixel-perfect sizing | Import only icons you use |
 | **clsx + tailwind-merge** | Conditional classes without style conflicts | Standard combo in Tailwind apps |
 
+### Community Library Ecosystem (from 30+ repos)
+
+**Framework split across production apps:**
+| Framework | Used By | When |
+|-----------|---------|------|
+| `@devvit/public-api` (Blocks API) | bot-bouncer, only-flairs, user-scorer, mod-mentions, admin-tattler, sub-stats-bot, automodmail, modmail-userinfo, evasion-guard, bot-reply-msg, modmail-to-discord | Mod tools, bots, simple trigger apps |
+| `@devvit/web` (Devvit Web) | community-chats, HotAndCold, microlympics, template-react, template-bare, template-phaser, template-threejs | Games, community apps, full client/server apps |
+
+**Universal utilities (appear in almost every repo):**
+| Library | Used By | Purpose |
+|---------|---------|---------|
+| `date-fns` | bot-bouncer, sub-stats-bot, automodmail, modmail-userinfo, evasion-guard | Date manipulation (`addSeconds`, `subDays`, `formatDistanceToNow`) |
+| `vitest` | ALL repos | Testing framework (every repo uses it) |
+| `json2md` | bot-bouncer, sub-stats-bot, automodmail, modmail-userinfo, evasion-guard | Convert JSON to markdown for modmail formatting |
+| `pako` | bot-bouncer, toolbox-storage | Compression (`deflate` + base64 for large Redis payloads) |
+| `lodash` | bot-bouncer, sub-stats-bot, automodmail, modmail-userinfo | Utilities (`compact`, `chunk`, `merge`) |
+| `ajv` | bot-bouncer, automodmail | JSON Schema validation for config/settings |
+
+**Mod tool / automation specific:**
+| Library | Used By | Purpose |
+|---------|---------|---------|
+| `yaml` | automodmail, modmail-to-discord | YAML rule parsing |
+| `pluralize` | sub-stats-bot, automodmail, modmail-userinfo, evasion-guard | Grammar utilities for messages |
+| `escape-string-regexp` | bot-bouncer | Safe regex construction |
+| `redos-detector` | bot-bouncer | Regex denial-of-service protection |
+| `markdown-escape` | bot-bouncer | Escape markdown in user-generated content |
+| `cron-parser` | sub-stats-bot | Parse cron expressions |
+| `semver` | bot-bouncer | Version comparison for upgrade detection |
+
+**AI / advanced features:**
+| Library | Used By | Purpose |
+|---------|---------|---------|
+| `openai` | bot-bouncer, HotAndCold | AI content analysis, summary generation |
+| `@google/genai` | HotAndCold | Google Gemini integration |
+| `sqlite-vec` | devvit-mcp, HotAndCold | Vector search for embeddings |
+| `better-sqlite3` | devvit-mcp | Fast SQLite for local doc storage |
+| `ioredis` | HotAndCold | Advanced Redis operations |
+| `pg` | HotAndCold | Postgres database |
+| `playwright` | HotAndCold | Browser automation testing |
+| `posthog-js` | HotAndCold | Product analytics |
+| `zod` | HotAndCold, mwood23-webview-react | Schema validation |
+
+**Game / visual libraries:**
+| Library | Used By | Purpose |
+|---------|---------|---------|
+| `phaser` | template-phaser-devvit, template-phaser | 2D game engine |
+| `three` | template-threejs | 3D engine |
+| `framer-motion` | community-chats, mwood23-webview-react | React animations, layout transitions |
+| `lucide-react` | community-chats | Tree-shakeable icons |
+| `motion` (Framer Motion v12) | mwood23-webview-react | Animation library |
+
+**Reusable helper libraries (published to npm or GitHub):**
+| Library | Used By | Purpose |
+|---------|---------|---------|
+| `devvit-helpers` | automodmail, modmail-userinfo, bot-bouncer | Shared Devvit utilities (validators, Reddit API wrappers) |
+| `@fsvreddit/fsv-devvit-helpers` | sub-stats-bot, automodmail, modmail-userinfo, evasion-guard | fsvreddit's shared helpers (dedup, raw API access) |
+| `toolbox-devvit` | modmail-userinfo | Toolbox wiki-as-database integration |
+
 ### Devvit-Specific Imports
 ```typescript
 // Server (src/server/) — available as magical imports
