@@ -491,6 +491,82 @@ import { devvit } from '@devvit/start/vite';  // Vite plugin
 import { getServerPort, createServer } from '@devvit/web/server';  // Server boot
 ```
 
+---
+
+## Devvit v0.13 (May 2026) — New Capabilities
+
+### Push Notifications (`@devvit/notifications` — experimental)
+```typescript
+import { notifications } from '@devvit/notifications';
+await notifications.optInCurrentUser();
+await notifications.enqueue({
+  title: 'Your daily reward!', body: 'Come back and play',
+  recipients: [{ userId: 'abc', data: { streak: '5' } }], // Mustache: {{streak}}
+});
+```
+Rate limits: 2/user/day, 25K/app/day. Built-in opt-in/opt-out UX.
+
+### Streak System (Redis bitmap-based)
+```typescript
+// 1 bit per day, 365 bits/year (~46 bytes). Cross-year continuity.
+await redis.bitField(`streak:${userId}:2026`, [
+  { operation: 'SET', encoding: 'u1', offset: dayOfYear },
+  { operation: 'GET', encoding: 'u1', offset: 0 },
+]);
+```
+
+### Media Uploads + Share Sheets + Logged Out Users
+```typescript
+import { media } from '@devvit/web/server';
+await media.upload({ url: 'https://...', type: 'image' }); // PNG/JPEG/WEBP/GIF, 20MB max
+
+import { showLoginPrompt, showShareSheet } from '@devvit/web/client';
+showShareSheet({ title: 'My Score', text: 'I scored 9000!', data: 'abc' });
+```
+
+### Post Styles + User Actions
+```typescript
+await reddit.submitCustomPost({ styles: { backgroundColor: { light: '#FFF', dark: '#000' } } });
+await post.setCustomPostStyles({ shareImageUrl: 'https://...' });
+// runAs: 'USER' now requires app review approval
+```
+
+### Scheduler: Second-Level Cron (experimental)
+6-part cron: `*/30 * * * * *` = every 30 seconds.
+
+### Realtime (Devvit Web only, removed from public-api)
+```typescript
+await realtime.send(channel, msg); // Server. No ':' in channel names.
+const conn = connectRealtime({ channel, onMessage }); // Client
+```
+
+### New Dependencies Added
+| Library | Source | Purpose |
+|---------|--------|---------|
+| `fast-check` | ModSync, AppealDesk, ModKudos | Property-based testing |
+| `ulid` | ModSync | Sortable unique IDs |
+| `fast-xml-parser` | Podcast Poster | RSS feed parsing |
+| `react-markdown` | Podcast Poster | Markdown rendering in React |
+| `node-html-markdown` | Podcast Poster | HTML→markdown conversion |
+
+### Community Pattern Highlights
+
+**Sorted-Set Claim Index (no SCAN in Devvit Redis)** (ModSync):
+```typescript
+const live = await redis.zRange(claimsIndexKey(sub), cutoff, '+inf', { by: 'score' });
+// Each claim: SET with TTL + ZADD to index. Read via zRange, clean via score.
+```
+Engineering: 180+ tests, 11 fast-check properties, DI with fake Redis, per-step claim refresh, lazy GDPR scrubbing.
+
+**Coordinated-Attack Detection** (FairSift):
+SHA-1 fingerprinting: normalize text → hash → check 1-hour Redis window for 3+ distinct-author matches. Unicode property escapes for cross-language.
+
+**Raw Node:HTTP + Custom esbuild (no @devvit/start)** (Podcast Poster):
+Manual switch-case routing, 19 RSS host providers, visibilitychange mobile reload hack (Reddit app leaves webview blank after navigateTo on return). 49 commits — most mature.
+
+**Gini Coefficient Workload Imbalance** (Modlytics):
+Pure computation engine (zero Devvit imports) with statistical math for burnout detection. Interface-based adapter separates core logic from Devvit runtime.
+
 ## 5. Redis Patterns
 
 ### Basic Operations
