@@ -267,6 +267,50 @@ if (bannedUsers.length > 0) {
 }
 ```
 
+### Hono Middleware Auth Guard (Reddit Copilot)
+Protect ALL API routes with a single middleware — no per-endpoint auth checks:
+```typescript
+// Hono middleware runs before every request
+api.use('*', async (c, next) => {
+  const isModerator = await isCurrentUserModerator();
+  if (!isModerator) {
+    return c.json({ status: 'error', message: 'Moderator access required' }, 403);
+  }
+  await next(); // Only mods get past here
+});
+```
+This pattern eliminates scattered `isMod` checks across every endpoint. Use `api.use('/admin/*', middleware)` for partial protection.
+
+### Cascading Analysis Pipeline — Heuristic First, LLM as Fallback (SpoilerSenser)
+```typescript
+function analyze(content) {
+  // Step 1: Fast heuristic scan (regex, keyword matching) — zero cost
+  const heuristicResult = runHeuristics(content);
+  if (heuristicResult.confidence === 'HIGH') return heuristicResult; // Skip LLM
+  if (heuristicResult.confidence === 'LOW' && !heuristicResult.ambiguous) return heuristicResult; // Skip LLM
+
+  // Step 2: Only call LLM when heuristic is ambiguous
+  const llmResult = await callLLM(content);
+  return llmResult; // Expensive call, but only when necessary
+}
+```
+Saves 80%+ API costs by filtering obvious cases heuristically before hitting expensive AI APIs.
+
+### External Edge Worker Integration (HumanDefender)
+Offload heavy compute to Cloudflare Workers with graceful degradation:
+```typescript
+try {
+  const resp = await fetch(`${WORKER_URL}/analyze`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(8000), // Hard timeout prevents Devvit execution limit
+  });
+  if (resp.ok) result = await resp.json();
+} catch {
+  // Edge worker down → signals default to 0. App keeps working.
+}
+```
+
 ### Server Frameworks
 - **Express**: Most common, manual routing with `express.Router()`
 - **Hono**: Used in React template, lighter weight
@@ -355,8 +399,20 @@ This is the stack Reddit's own Community Chats app uses — production-grade, wo
 | `phaser` | template-phaser-devvit, template-phaser | 2D game engine |
 | `three` | template-threejs | 3D engine |
 | `framer-motion` | community-chats, mwood23-webview-react | React animations, layout transitions |
-| `lucide-react` | community-chats | Tree-shakeable icons |
+| `lucide-react` | community-chats, GameSlideShow | Tree-shakeable icons |
 | `motion` (Framer Motion v12) | mwood23-webview-react | Animation library |
+| `svelte` | devvitsvelte | Svelte 5 framework (alternative to React) |
+| `recharts` | devvit-journey-insights | Chart library for analytics dashboards |
+| `@google/generative-ai` | Reddit-Copilot, llmphysics-bot | Google Gemini AI for content analysis |
+
+**Testing / tooling libraries:**
+| Library | Used By | Purpose |
+|---------|---------|---------|
+| `@devvit/test` | devvitsvelte | Devvit-specific test utilities (Redis + Post mocks) |
+| `@devvit/analytics` | devvit-journey-insights | Journey event tracking for analytics |
+| `playwright` | HotAndCold | Browser automation testing |
+| `concurrently` | devvitsvelte, community-chats | Run vite watch + devvit playtest in parallel |
+| `bun` (package manager) | devvitsvelte | Alternative to npm/yarn, faster installs |
 
 **Reusable helper libraries (published to npm or GitHub):**
 | Library | Used By | Purpose |
@@ -528,9 +584,37 @@ const chatSize = await redis.zCard(`chat:${postId}`);
 if (chatSize > 200) {
   await redis.zRemRangeByRank(`chat:${postId}`, 0, chatSize - 201); // Keep latest 200
 }
-// Poll for new messages since last sync:
 const newMsgs = await redis.zRange(`chat:${postId}`, lastSync + 1, Infinity, { by: 'score' });
 ```
+
+**16. Wiki-as-Data-Backup with Multi-Tier Fallback** (IRCC Processing)
+Three-tier data loading: GitHub fetch → hardcoded sample → wiki page backup:
+```typescript
+// Tier 1: Primary data source (HTTP fetch from GitHub)
+const data = await fetch(GITHUB_URL).then(r => r.json());
+
+// Tier 2: If fetch fails, use hardcoded sample data
+catch { data = SAMPLE_DATA; }
+
+// Tier 3: Menu action lets mods manually seed from a wiki page
+await reddit.getWikiPage(subredditName, 'data_backup');
+await redis.set('data', page.content);
+```
+Also stores `data:previous` in Redis to detect changes between fetches.
+
+**17. Jaccard Bigram Duplicate Detection** (Morddit)
+Detect near-duplicate content without external APIs:
+```typescript
+function getBigrams(text) {
+  const words = text.toLowerCase().split(/\s+/);
+  return words.slice(0, -1).map((w, i) => w + ' ' + words[i + 1]);
+}
+function jaccardSimilarity(bigramsA, bigramsB) {
+  const setA = new Set(bigramsA), setB = new Set(bigramsB);
+  const intersection = new Set([...setA].filter(x => setB.has(x)));
+  return intersection.size / (setA.size + setB.size - intersection.size);
+}
+// >= 90% = EXACT duplicate, >= 50% = SIMILAR
 
 ---
 

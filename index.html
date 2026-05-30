@@ -350,6 +350,30 @@ setInterval(sync, 3000);</code></pre>
     <p>Full Unity and HTML5 games running inside Reddit posts. Proof that Devvit can handle real games. Blokkit runs Unity WebGL. Pixelary is a draw-and-guess game. Both have thousands of daily players.</p>
     <p><a href="https://www.reddit.com/r/Blokkit/" target="_blank">r/Blokkit</a> &middot; <a href="https://www.reddit.com/r/Pixelary/" target="_blank">r/Pixelary</a></p>
   </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> ALBUS DUMBLEDORE</div>
+    <p>A Harry Potter quote bot that responds to "dumbledore!" in comments. Simple, charming, 61KB of quotes. Uses the modern <strong>@devvit/web trigger-as-HTTP-endpoint</strong> pattern — no <code>Devvit.addTrigger()</code>, just Hono routes mapped in devvit.json. Perfect example of a simple bot done the new way.</p>
+    <p><a href="https://github.com/overandoutnerd/albus-dunbledore" target="_blank">github.com/overandoutnerd/albus-dunbledore</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> LLMPHYSICS-BOT</div>
+    <p>Modular moderation bot with a <strong>plugin registry architecture</strong> — add a new module with one import. Uses Gemini's <code>url_context</code> trick to fetch external PDFs without Devvit HTTP permissions. Tracks everything in a shared Redis post hash used by multiple modules simultaneously.</p>
+    <p><a href="https://github.com/AllHailSeizure/llmphysics-bot" target="_blank">github.com/AllHailSeizure/llmphysics-bot</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> SPOILER SENSER</div>
+    <p>Hackathon winner that detects spoilers using a <strong>cascading analysis pipeline</strong>: fast regex heuristics first, LLM only when ambiguous. Saves 80%+ on API costs. Detects speculation language ("I think", "my theory") and confirmation language ("I watched it") to adjust risk scoring.</p>
+    <p><a href="https://github.com/arthantyo/spoilersense" target="_blank">github.com/arthantyo/spoilersense</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> GAME SLIDESHOW</div>
+    <p>A Reddit game discovery platform — carousel of word games playable on Reddit. Uses <strong>Redis sorted sets as a game database</strong> (no SQL!). Mod queue workflow with pending→approve→reject. Weekly cron jobs refresh subscriber counts and notify devs. Pure Devvit Web + Hono + React.</p>
+    <p><a href="https://github.com/forkliftdev/GameSlideShow" target="_blank">github.com/forkliftdev/GameSlideShow</a></p>
+  </div>
 </div>
 
 <!-- SECTION 8: WHAT'S NEXT -->
