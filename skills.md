@@ -311,6 +311,62 @@ try {
 }
 ```
 
+### Offline Tile Maps in CSP-Restricted iframes (Reddit-Map)
+Devvit's CSP blocks external images (`img-src 'self'`). Pre-download map tiles as build-time assets:
+```typescript
+// Build script: download OSM tiles covering city bbox at zoom 11-13
+// Store in public/maps/{z}/{x}/{y}.png
+// At runtime, Leaflet loads from same origin:
+L.tileLayer('/maps/{z}/{x}/{y}.png', { minZoom: 11, maxZoom: 13 }).addTo(map);
+
+// Pin click navigates via Devvit's navigateTo (not window.location):
+marker.on('click', () => navigateTo(`https://www.reddit.com${pin.permalink}`));
+```
+Also validates LLM coordinates against city bounding boxes to reject hallucinated locations.
+
+### Scheduler Escape Hatch for Devvit Timeouts (Reddit-Map)
+Triggers time out after seconds. For minutes-long work, schedule a background job:
+```typescript
+// Trigger returns immediately, real work runs in scheduler
+await scheduler.runJob({
+  name: 'backfill',
+  runAt: new Date(Date.now() + 5000), // 5-second delay
+  data: { sub, cityNames },
+});
+return c.json({ status: 'success', message: 'Scanning in background...' });
+```
+
+### Devvit Realtime Pub/Sub (ModarBot)
+Push live events from server to webview without polling:
+```typescript
+// Server: push event to channel
+await realtime.send(channelFor(sub), { type: 'anomaly', payload: event });
+
+// Client: subscribe to channel
+connectRealtime(channelFor(sub), (message) => {
+  setAlerts(prev => [message.payload, ...prev]); // Live push
+});
+```
+
+### Idempotent Reward System (ModKudos)
+Prevent double-rewarding with Redis key + 30-day TTL:
+```typescript
+const idemKey = `reward:${username}:${contentId}:${rewardType}`;
+if (await redis.exists(idemKey)) return; // Already rewarded
+await redis.set(idemKey, 'true', { expiration: addDays(new Date(), 30) });
+await applyReward(user, rewardType);
+```
+
+### Four-Tier Safety Gate (ContextMod)
+Before any real moderation action fires:
+```typescript
+if (!eventProcessingEnabled) return;          // 1: Global gate
+if (actionRuntime.dryRun) { logAudit(); return; } // 2: Dry run mode
+if (!action.enable) return;                   // 3: Action disabled
+if (action.dryRun) { logAudit(); return; }     // 4: Action-level dry run
+await executeAction(action, target);           // FIRE
+```
+
 ### Server Frameworks
 - **Express**: Most common, manual routing with `express.Router()`
 - **Hono**: Used in React template, lighter weight
@@ -615,21 +671,48 @@ function jaccardSimilarity(bigramsA, bigramsB) {
   return intersection.size / (setA.size + setB.size - intersection.size);
 }
 // >= 90% = EXACT duplicate, >= 50% = SIMILAR
+```
 
----
-
-## 6. Trigger Architecture
-
-### Available Triggers
+**18. Redis Sorted Set Sliding Windows** (RaidShield)
+O(log N) rate limiting without cron cleanup:
 ```typescript
-Devvit.addTrigger({ event: 'PostCreate' / 'PostSubmit', onEvent: handler });
-Devvit.addTrigger({ event: 'CommentCreate' / 'CommentSubmit', onEvent: handler });
-Devvit.addTrigger({ event: 'PostUpdate' / 'CommentUpdate', onEvent: handler });
-Devvit.addTrigger({ event: 'PostDelete' / 'CommentDelete', onEvent: handler });
-Devvit.addTrigger({ event: 'ModAction', onEvent: handler });
-Devvit.addTrigger({ event: 'ModMail', onEvent: handler });
-Devvit.addTrigger({ events: ['AppInstall', 'AppUpgrade'], onEvent: handler });
-Devvit.addTrigger({ event: 'PostFlairUpdate', onEvent: handler });
+async function recordAndCountVelocity(redis, key, memberId, windowMs) {
+  const now = Date.now();
+  await redis.zAdd(key, { score: now, member: `${memberId}:${now}` });
+  await redis.zRemRangeByScore(key, 0, now - windowMs); // Prune expired
+  return await redis.zCard(key); // Active count in window
+}
+```
+
+**19. Homoglyph-Normalized Fingerprinting** (RaidShield)
+Catch copy-paste spam even with Cyrillic lookalikes and zero-width characters:
+```typescript
+function fingerprintText(text) {
+  let normalized = text
+    .replace(/[\u200B-\u200D\uFEFF]/g, '') // Strip zero-width chars
+    .replace(/[аеорсх]/g, c => ({'а':'a','е':'e','о':'o','р':'p','с':'c','х':'x'}[c])) // Cyrillic
+    .toLowerCase().replace(/[^a-z0-9 ]/g, '');
+  let hash = 5381; // djb2
+  for (let i = 0; i < normalized.length; i++) hash = ((hash << 5) + hash) ^ normalized.charCodeAt(i);
+  return (hash >>> 0).toString(16).padStart(8, '0');
+}
+```
+
+**20. Redis WATCH/MULTI/EXEC CAS for Optimistic Concurrency** (AppealDesk)
+Prevent silent overwrites with version-checked atomic mutations:
+```typescript
+async function mutate(redis, key, mutator) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const tx = await redis.watch(key);
+    const current = JSON.parse(await redis.get(key) || '{}');
+    const next = mutator(current);
+    await tx.multi();
+    await tx.set(key, JSON.stringify(next));
+    const result = await tx.exec(); // null = conflict, retry
+    if (result !== null) return next;
+  }
+  throw new Error('CAS conflict after 5 retries');
+}
 ```
 
 ### Trigger Best Practices

@@ -370,9 +370,39 @@ setInterval(sync, 3000);</code></pre>
   </div>
 
   <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> GAME SLIDESHOW</div>
-    <p>A Reddit game discovery platform — carousel of word games playable on Reddit. Uses <strong>Redis sorted sets as a game database</strong> (no SQL!). Mod queue workflow with pending→approve→reject. Weekly cron jobs refresh subscriber counts and notify devs. Pure Devvit Web + Hono + React.</p>
-    <p><a href="https://github.com/forkliftdev/GameSlideShow" target="_blank">github.com/forkliftdev/GameSlideShow</a></p>
+    <div class="note-title">> REDDIT MAP (MUST-SEE)</div>
+    <p>Scans subreddit posts for venue mentions, extracts named places via OpenAI with structured JSON + bbox hallucination guards, and renders them as pins on an interactive <strong>Leaflet.js map</strong>. <strong>Offline tiles pre-downloaded at build time</strong> to bypass Devvit's CSP — brilliant hack. Comment-tree scanning finds buried recommendations. 6 city scopes with regional overlays.</p>
+    <p><a href="https://github.com/jonaaldas/reddit-map" target="_blank">github.com/jonaaldas/reddit-map</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> RAIDSHIELD</div>
+    <p>Real-time raid protection with <strong>homoglyph-normalized text fingerprinting</strong> — converts Cyrillic lookalikes (а→a, е→e) and strips zero-width characters before hashing. Uses Redis sorted set sliding windows for O(log N) velocity tracking. <strong>Fail-open design</strong>: if Redis is down, content passes through instead of blocking everyone.</p>
+    <p><a href="https://github.com/mohamdImran/raidshield" target="_blank">github.com/mohamdImran/raidshield</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> MODARBOT</div>
+    <p>Uses <strong>Devvit Realtime pub/sub</strong> as a live event bus — the only app that does. Six statistical detectors (new-account cluster, comment cascade, cross-post influx) emit anomaly events via <code>realtime.send()</code>. The React webview subscribes via <code>connectRealtime()</code> for zero-latency alerts. No polling needed.</p>
+    <p><a href="https://github.com/erenisci/modarbot" target="_blank">github.com/erenisci/modarbot</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="note-title">> MODKUDOS</div>
+    <p>Positive reinforcement engine: auto-detects quality content, rewards contributors with flair and thank-you messages. Uses <strong>idempotent reward keys</strong> with 30-day Redis TTL to prevent double-rewarding. Dynamic cron interval from settings. 195 tests including property-based testing with fast-check.</p>
+    <p><a href="https://github.com/tanDivina/mod-kudos" target="_blank">github.com/tanDivina/mod-kudos</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> APPEAL DESK</div>
+    <p>The most rigorously architected Devvit app: <strong>clean architecture core</strong> with zero Devvit imports, thin runtime shell as adapter. Uses <strong>Redis WATCH/MULTI/EXEC CAS</strong> for optimistic concurrency with 5-retry bounded loops. 100% test coverage on core. AI is a first-class no-op — the app is complete without it.</p>
+    <p><a href="https://github.com/vsenthil7/appeal-desk" target="_blank">github.com/vsenthil7/appeal-desk</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="note-title">> HIVEMIND DEFENCE</div>
+    <p>Cleverest workaround for Devvit's per-installation Redis silo: uses <strong>structured Reddit comments as a distributed ledger</strong>. Nodes post <code>[SIGNAL]</code>/<code>[DISMISS]</code> comments to a pinned hub post. HMAC-SHA256 identity protection prevents rainbow-table reversal. Graduated response: 1 flag=watch, 2=elevate, 3+=queue. Never auto-bans.</p>
+    <p><a href="https://github.com/GauravS11112003/HiveMind-Defence" target="_blank">github.com/GauravS11112003/HiveMind-Defence</a></p>
   </div>
 </div>
 
