@@ -730,6 +730,161 @@ These apps were built for the official Reddit hackathon and are published on the
 | **ModPulse** | AstaadDahiya | Real-time community health dashboard, event-driven (zero polling), weekly digests | Trigger-only architecture (no CRON) |
 | **My TL;DR** | 0xMarcAurel | AI post summaries via Gemini 2.5 Flash, one-click mod menu → stickied comment | ModMenu + AI on-demand |
 
+### More New Repos & Patterns Discovered (June 2026 Deep Search)
+
+**Explainable Heuristic Scoring (TriageGuard):**
+Priority triage with 0–100 urgency scoring and risk bands (Critical / High / Routine / Likely OK):
+```typescript
+function scoreUrgency(post: Post): { score: number, band: string, explain: string[] } {
+  const reasons: string[] = [];
+  let score = 0;
+  if (post.isNewUser) { score += 25; reasons.push('New account (+25)'); }
+  if (post.reportCount > 3) { score += 30; reasons.push('3+ reports (+30)'); }
+  if (isWatchedDomain(post.url)) { score += 20; reasons.push('Watched domain (+20)'); }
+  const band = score >= 70 ? 'Critical' : score >= 40 ? 'High' : score >= 20 ? 'Routine' : 'Likely OK';
+  return { score, band, explain: reasons };
+}
+```
+Pattern: wiki rules cache + optional LLM enrichment. Each item includes an explainability panel showing WHY it was prioritized. (Source: `nag-gude/triageguard`)
+
+**Multi-Mod Locking with Redis Heartbeats (Vigil):**
+Coordinate multiple moderators working on the same queue item — prevents duplicate processing:
+```typescript
+async function acquireLock(itemId: string, moderatorId: string, ttl = 60): Promise<boolean> {
+  const lockKey = `lock:${itemId}`;
+  const acquired = await redis.hSetNX(lockKey, 'mod', moderatorId);
+  if (acquired) {
+    await redis.expire(lockKey, ttl);
+    // Heartbeat loop: extend lock every 20s while processing
+    startHeartbeat(lockKey, moderatorId, ttl);
+    return true;
+  }
+  const currentOwner = await redis.hGet(lockKey, 'mod');
+  throw new Error(`Item already locked by ${currentOwner}`);
+}
+```
+8 Redis key namespaces designed with meticulous care. Dry-run ON by default. (Source: `labishbardiya/Vigil`)
+
+**Tool/Plugin Registry Pattern (SuperModds):**
+Extensible module system with `registry.ts` for loading moderation tools dynamically:
+```typescript
+// src/server/tools/registry.ts
+interface ModTool {
+  name: string;
+  enabled: boolean;
+  onPost: (post: Post) => Promise<Action | null>;
+  onComment: (comment: Comment) => Promise<Action | null>;
+}
+
+class ToolRegistry {
+  private tools: Map<string, ModTool> = new Map();
+  register(tool: ModTool) { this.tools.set(tool.name, tool); }
+  async evaluatePost(post: Post): Promise<Action | null> {
+    for (const tool of this.tools.values()) {
+      if (!tool.enabled) continue;
+      const action = await tool.onPost(post);
+      if (action) return action; // First match wins
+    }
+    return null;
+  }
+}
+```
+Also features rolling-window rate limiting (not fixed calendar bucket) and permission chain system with auto-assignment. (Source: `Isaac12x/SuperModds`)
+
+**Incident Workflow Lifecycle (Incident Room):**
+Structured incident management workflow: Declare → Claim → Brief → Confirm → After-action:
+```typescript
+interface Incident {
+  id: string;
+  status: 'declared' | 'claimed' | 'briefing' | 'confirmed' | 'after-action';
+  evidence: Evidence[];
+  timeline: TimelineEntry[];
+  claimedBy?: string;
+}
+// Evidence scoring with timeline, action packs for team coordination
+// Local TypeScript rule engine (watch terms, report velocity, fresh accounts)
+// Tests with Vitest AND Playwright for rule scoring
+```
+AI briefing via OpenAI-compatible API. After-action metrics persist in the custom post. (Source: `veithly/incident-room`)
+
+**Framework Layering: GameServer Abstract Class (devvit-hub, devvit-phaser):**
+Abstract Devvit's APIs into reusable server classes — think Express for Devvit games:
+```typescript
+class BasicGameServer {
+  constructor(protected redis: Redis, protected realtime: Realtime) {}
+  async onPostCreated(postId: string): Promise<void> { /* override */ }
+  async broadcast(channel: string, msg: unknown): Promise<void> {
+    await this.realtime.send(channel, msg); // Auto pub-sub per post
+  }
+}
+
+// Three-tier: BasicGameServer → PhaserGameSrv → DataManagerServer
+// npm package: devvit-hub
+// Also includes MCP server for testing
+```
+(Source: `fizx/devvit-hub`, `fizx/devvit-phaser`)
+
+**Sandboxed JS Execution via QuickJS (over9000games):**
+Run user-created JavaScript games inside Devvit using QuickJS sandbox:
+```typescript
+// Server-side: eval user code in QuickJS sandbox
+const sandbox = new QuickJS(); // Sandboxed — no access to Node/Devvit APIs
+const result = sandbox.evaluate(userGameCode, { input: playerAction });
+// Generate screenshot via headless runner for preview thumbnails
+```
+Pattern: Redis-based async job queue for game generation, 30-day TTL for game drafts, OpenRouter multi-model testing. (Source: `Strawberry-Computer/over9000games`)
+
+**Comment-as-Command Multiplayer (skill-seeker):**
+Players join and interact with a game via Reddit comments — no webview needed:
+```typescript
+// devvit.json trigger on CommentSubmit
+router.post('/internal/triggers/comment', async (req, res) => {
+  const { comment } = req.body;
+  if (comment.body === '!join') {
+    await redis.zAdd(`game:${postId}:players`, { member: comment.author, score: Date.now() });
+    // Reply confirmation as comment reply
+  }
+});
+```
+Entire multiplayer quiz game in single file (`main.tsx`). Zero webview — pure trigger-based. (Source: `vero-code/skill-seeker`)
+
+**Devvit Env Var Limitation (devvit-ocrdocs):**
+Critical documented finding: `process.env` is NOT available in Devvit runtime. API keys must use Devvit settings (app-scoped secrets):
+```typescript
+// ❌ DOES NOT WORK in Devvit — process.env is undefined
+const apiKey = process.env.OPENAI_API_KEY;
+
+// ✅ WORKS — use app-scoped settings
+// devvit.json: { "type": "string", "name": "openaiKey", "scope": "app", "isSecret": true }
+const apiKey = await context.settings.get<string>('openaiKey');
+```
+This means: NO `dotenv`, NO reading `.env` files, NO `process.env`. Everything must go through Devvit's settings system. External services (AWS S3, etc.) that require env vars for SDK configuration won't work directly. Detailed in `WHY_GEMINI_WORKS_BUT_AWS_DOESNT.md` by the app author. (Source: `fapulito/devvit-ocrdocs`)
+
+**lit-html Webview (fiddlesticks):**
+Devvit webview doesn't HAVE to use React — lit-html is a lighter alternative:
+```typescript
+import { html, render } from 'lit-html';
+// No JSX, no virtual DOM — just tagged template literals
+render(html`
+  <div class="game">
+    <h2>${title}</h2>
+    <button @click=${onPick}>Pick</button>
+  </div>
+`, document.getElementById('app'));
+```
+Pattern: Same Devvit Web architecture but with lit-html instead of React. Smaller bundle, simpler for non-React devs. (Source: `reddit/devvit-fiddlesticks`)
+
+**Official Devvit App Patterns (reddit/devvit monorepo apps):**
+The `reddit/devvit` monorepo contains reference apps under `packages/apps/`:
+| App | Pattern |
+|-----|---------|
+| `server-push` | Scheduler + Realtime push — best ref for CRON→client push |
+| `synced-progress-bar` | Multi-user synced progress via Realtime channels |
+| `mini-place` | Collaborative pixel canvas (r/place-style) with Redis conflict resolution |
+| `payments-example` | Full in-app purchase integration reference |
+| `polls-plus` | Enhanced polls with realtime vote counts |
+| `live-scores` | Live score updates via Realtime pub/sub |
+
 ## 5. Redis Patterns
 
 ### Basic Operations
@@ -951,6 +1106,25 @@ async function mutate(redis, key, mutator) {
     if (result !== null) return next;
   }
   throw new Error('CAS conflict after 5 retries');
+}
+```
+
+**21. Rolling Window Rate Limiting** (SuperModds)
+Rate limit per action type using Redis sorted set sliding window — NOT fixed calendar bucket:
+```typescript
+const WINDOW_MS = 3600000; // 1 hour
+const MAX_ACTIONS = 10;
+
+async function checkRateLimit(key: string, userId: string): Promise<boolean> {
+  const now = Date.now();
+  const windowKey = `ratelimit:${key}:${userId}`;
+  // Clean expired entries
+  await redis.zRemRangeByScore(windowKey, 0, now - WINDOW_MS);
+  const count = await redis.zCard(windowKey);
+  if (count >= MAX_ACTIONS) return false; // Rate limited
+  await redis.zAdd(windowKey, { score: now, member: `${now}` });
+  await redis.expire(windowKey, Math.ceil(WINDOW_MS / 1000)); // TTL for auto-cleanup
+  return true;
 }
 ```
 
@@ -1490,6 +1664,8 @@ if (context.subredditName !== EXPECTED) throw new Error('Wrong subreddit');
 | `context.subredditName` vs `context.subreddit` | Use `context.subredditName \|\| context.subreddit` for safety |
 | `context.postId` is raw ID (no `t3_` prefix) | Check: `postId.startsWith("t3_") ? postId : "t3_" + postId` |
 | `reddit.submitComment()` fails in inline webview | Not available; use `reddit.submitCustomPost()` instead |
+| `process.env` is undefined in Devvit runtime | Use app-scoped settings for API keys: `context.settings.get('myKey')` |
+| No `dotenv`, no `.env` files, no env var SDK config | Settings-based pattern for all secrets — AWS/Stripe SDKs that require env vars won't work directly |
 | Tab rapid-click causes API flood | Add debounce flag: `if (loading) return; loading = true;` |
 
 ### Self-Healing
