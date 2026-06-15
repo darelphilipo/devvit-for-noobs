@@ -23,9 +23,10 @@
     <li><a href="#patterns"><span class="nav-num">05</span>Real Patterns</a></li>
     <li><a href="#gotchas"><span class="nav-num">06</span>Wish I Knew Sooner</a></li>
     <li><a href="#spotlight"><span class="nav-num">07</span>Community Spotlight</a></li>
-    <li><a href="#next"><span class="nav-num">08</span>What's Next</a></li>
+    <li><a href="#migration"><span class="nav-num">08</span>Blocks Migration</a></li>
+    <li><a href="#next"><span class="nav-num">09</span>What's Next</a></li>
   </ul>
-  <div class="sidebar-footer">github.com/you/devvit-for-noobs</div>
+  <div class="sidebar-footer">from 40+ community repos</div>
 </nav>
 
 <!-- MOBILE TOGGLE -->
@@ -82,7 +83,7 @@
 # On Windows, the command is "devvit-cli" not "devvit"
 devvit-cli --version</code></pre>
 
-  <p><strong>Step 2:</strong> Create your app. Pick "React" for games, "Bare" for mod tools.</p>
+  <p><strong>Step 2:</strong> Create your app. Devvit Web is now the ONLY option — pick "React" (games/community apps) or "Bare" (mod tools/bots). Blocks is dead.</p>
 <pre><code>devvit-cli init
 # Follow the browser OAuth flow — code auto-captures</code></pre>
 
@@ -122,13 +123,19 @@ const top10 = await redis.zRange("highscores", 0, 9, { by: "rank" });</code></pr
   <div class="note-box" style="margin-top:12px;">
     <div class="note-title">> TRIGGERS — When Stuff Happens</div>
     <p>Triggers are the "when X happens, do Y" of Reddit. New comment? Trigger fires. Mod takes an action? Trigger fires. App gets installed? Trigger fires. You just write the "what to do" part.</p>
-<pre><code>// Auto-respond to every new comment (don't actually do this)
-Devvit.addTrigger({
-  event: "CommentSubmit",
-  onEvent: async (event, context) => {
-    console.log("Someone said: " + event.comment.body);
-    // DO SOMETHING COOL HERE
+<pre><code>// In devvit.json — declare what events you want to listen to
+"triggers": {
+  "events": {
+    "CommentSubmit": { "endpoint": "/internal/triggers/comment" }
   }
+}
+
+// In your server code — handle the event via an HTTP endpoint
+router.post("/internal/triggers/comment", async (req, res) => {
+  const { comment } = req.body;
+  console.log("Someone said: " + comment.body);
+  // DO SOMETHING COOL HERE
+  res.json({ status: "ok" });
 });</code></pre>
   </div>
 
@@ -153,13 +160,13 @@ Devvit.addTrigger({
     <span class="section-num">04</span>
     <h3>Libraries: What Real Devs Actually Use</h3>
   </div>
-  <p>Don't guess what to install. Here's what the most popular production apps use (extracted from 30+ repos):</p>
+   <p>Don't guess what to install. Here's what the most popular production apps use (extracted from 40+ repos):</p>
 
-  <div class="warn-box">
-    <div class="warn-title">> THE BIG DECISION: @devvit/web vs @devvit/public-api</div>
-    <p><strong>Use <code>@devvit/web</code> for:</strong> Games, community apps, surveys, anything with a real UI. This is the modern path. You get HTML/CSS/JS in an iframe + Express/Hono backend + Redis. It's what Reddit recommends for new apps.</p>
-    <p><strong>Use <code>@devvit/public-api</code> for:</strong> Mod tools, bots, simple automations. These apps run trigger-based logic ("when someone comments, do X") and don't need a fancy UI. Lighter weight, simpler to deploy.</p>
-    <p><em>Community Chats, HotAndCold, Microlympics all use <code>@devvit/web</code>. Only-Flairs, Mod-Mentions, Admin-Tattler use <code>@devvit/public-api</code>.</em></p>
+  <div class="warn-box" style="border-color:var(--red);">
+    <div class="warn-title">> ⚠️ CRITICAL: @devvit/public-api (Blocks) IS DEAD</div>
+    <p><strong><code>@devvit/public-api</code> (Blocks) was removed in v0.13.0 (May 2026). Support ends on all Reddit clients <strong>June 30, 2026</strong>.</strong> All NEW apps must use <strong><code>@devvit/web</code></strong> exclusively. Existing Blocks apps must migrate immediately.</p>
+    <p><code>@devvit/web</code> gives you HTML/CSS/JS in an iframe + Express/Hono backend + Redis + Realtime + Media uploads. It's what Reddit recommends for ALL new apps — games, mod tools, bots, everything.</p>
+    <p><em>See the <a href="#migration">Blocks Migration</a> section below for what changed and how to migrate.</em></p>
   </div>
 
   <div class="note-box" style="margin-top:12px;">
@@ -190,6 +197,11 @@ Devvit.addTrigger({
     <div class="warn-title">> AI / ADVANCED FEATURES</div>
     <p>HotAndCold uses <strong>OpenAI</strong> + <strong>Google Gemini</strong> for content generation. Bot Bouncer uses <strong>redos-detector</strong> to prevent regex attacks. If you need vector search, <strong>sqlite-vec</strong> works inside Devvit.</p>
   </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> NEW: OFFICIAL UI KIT & PIXIJS TEMPLATE</div>
+    <p>Reddit now maintains <strong>@devvit/kit</strong> with UI components: <code>Columns</code>, <code>ItemPagination</code>, <code>DevToolbar</code>. Install via <code>npm install @devvit/kit</code>. Also new: <strong>PixiJS 8 + React 19</strong> combo template for 2D games, and <strong>DEFCON RED</strong> scenario-based game example from the official Reddit team.</p>
+  </div>
 </div>
 
 <!-- SECTION 4: REAL PATTERNS FROM REAL DEVS -->
@@ -198,7 +210,7 @@ Devvit.addTrigger({
     <span class="section-num">05</span>
     <h3>Battle-Tested Patterns from Real Devs</h3>
   </div>
-  <p>These patterns came from analyzing 30+ production Devvit apps. They solve the problems you'll actually hit.</p>
+  <p>These patterns came from analyzing 40+ production Devvit apps. They solve the problems you'll actually hit.</p>
 
   <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 1: The Hybrid Backend</h4>
   <p><em>Used by: Meetit (event manager), Microlympics</em></p>
@@ -400,24 +412,84 @@ setInterval(sync, 3000);</code></pre>
   </div>
 
   <div class="warn-box" style="margin-top:12px;">
-    <div class="note-title">> HIVEMIND DEFENCE</div>
+    <div class="warn-title">> HIVEMIND DEFENCE</div>
     <p>Cleverest workaround for Devvit's per-installation Redis silo: uses <strong>structured Reddit comments as a distributed ledger</strong>. Nodes post <code>[SIGNAL]</code>/<code>[DISMISS]</code> comments to a pinned hub post. HMAC-SHA256 identity protection prevents rainbow-table reversal. Graduated response: 1 flag=watch, 2=elevate, 3+=queue. Never auto-bans.</p>
     <p><a href="https://github.com/GauravS11112003/HiveMind-Defence" target="_blank">github.com/GauravS11112003/HiveMind-Defence</a></p>
   </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> DEFCON RED (Official Reddit)</div>
+    <p>Presidential crisis simulator — <strong>declarative scenario DSL</strong> + deterministic game loop + optional Gemini AI dialogue. Each game state is typed JSON, the engine evaluates player choices deterministically. Official Reddit example showing how to build complex narrative games on Devvit Web.</p>
+    <p><a href="https://github.com/reddit/devvit-defcon-red-game" target="_blank">github.com/reddit/devvit-defcon-red-game</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> CONTEXTMOD (Hackathon Winner)</div>
+    <p>JSON5 rule engine for content moderation with <strong>live telemetry dashboard, dry-run rule tester, and AI explainer</strong>. Ported from PRAW-era to Devvit Web. The four-tier safety gate pattern (global gate → dry run → action disabled → action dry run → FIRE) is a must-study architecture for mod tools.</p>
+    <p><a href="https://github.com/StephenSook/context-mod-devvit" target="_blank">github.com/StephenSook/context-mod-devvit</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> MODPULSE</div>
+    <p>Real-time community health monitoring dashboard. <strong>Zero polling architecture</strong> — purely event-driven using Devvit triggers (<code>PostSubmit</code>, <code>PostReport</code>, <code>CommentSubmit</code>). Weekly digests via Modmail. React dashboard via WebView. No CRON needed.</p>
+    <p><a href="https://github.com/AstaadDahiya/ModPulse" target="_blank">github.com/AstaadDahiya/ModPulse</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> DEVVIT-STATE (New Library)</div>
+    <p>Atomic, versioned state sync for Devvit apps. Uses <strong>Redis transactions + strict versioning + Zod schemas + Devvit Realtime</strong> for server-authoritative state with automatic client sync. Published as <code>devvit-state</code> on npm (v0.3.0).</p>
+    <p><a href="https://github.com/foreverest/devvit-state" target="_blank">github.com/foreverest/devvit-state</a></p>
+  </div>
+</div>
 </div>
 
-<!-- SECTION 8: WHAT'S NEXT -->
-<div class="section" id="next">
+<!-- SECTION 8: BLOCKS MIGRATION -->
+<div class="section" id="migration">
   <div class="section-header">
     <span class="section-num">08</span>
+    <h3>⚠️ Blocks Migration (Urgent)</h3>
+  </div>
+
+  <p><strong>Blocks UI is END OF LIFE.</strong> Removed from <code>@devvit/public-api</code> in v0.13.0. Support drops from all Reddit clients <strong>June 30, 2026</strong>. If you have an existing Blocks app, you must migrate before then.</p>
+
+  <div class="warn-box">
+    <div class="warn-title">> WHAT CHANGED</div>
+    <table class="pixel-table" style="margin:12px 0;font-size:0.75rem;">
+      <tr><th>Old (Blocks)</th><th>New (Devvit Web)</th></tr>
+      <tr><td><code>Devvit.addCustomPostType()</code></td><td><code>devvit.json</code> entrypoints</td></tr>
+      <tr><td><code>useWebView()</code> + <code>postMessage</code></td><td><code>fetch('/api/...')</code> HTTP calls</td></tr>
+      <tr><td><code>Devvit.addMenuItem({onPress})</code></td><td><code>devvit.json</code> menu + HTTP endpoints</td></tr>
+      <tr><td><code>useChannel()</code> / <code>realtime</code></td><td><code>@devvit/web/server</code> Realtime only</td></tr>
+      <tr><td><code>Context.kvStore</code></td><td><code>redis.get/set</code> directly</td></tr>
+      <tr><td><code>@devvit/payments</code></td><td>Web-only payments via devvit.json</td></tr>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <div class="note-title">> BLOCKS MIGRATION STEPS</div>
+    <p><strong>1.</strong> Create new app with <code>devvit-cli init</code> &rarr; select "React" template</p>
+    <p><strong>2.</strong> Move server logic to <code>src/server/</code> with Hono/Express routes</p>
+    <p><strong>3.</strong> Move UI to <code>src/client/</code> with React + Tailwind</p>
+    <p><strong>4.</strong> Replace <code>Devvit.addTrigger()</code> with <code>devvit.json</code> trigger config + HTTP endpoints</p>
+    <p><strong>5.</strong> Replace <code>postMessage</code> with <code>fetch('/api/...')</code></p>
+    <p><strong>6.</strong> Test on mobile AND desktop before June 30!</p>
+  </div>
+</div>
+
+<!-- SECTION 9: WHAT'S NEXT -->
+<div class="section" id="next">
+  <div class="section-header">
+    <span class="section-num">09</span>
     <h3>What's Next?</h3>
   </div>
 
   <p>You now know enough to build something real. Here's your launch sequence:</p>
 
+  <p><strong>⚠️ Reminder:</strong> <strong>Blocks UI is dead.</strong> Support ends June 30, 2026. Use <code>@devvit/web</code> for ALL new apps. If you have an old Blocks app, <a href="#migration">migrate now</a>.</p>
+
   <p><strong>1. Pick an idea.</strong> Start small. A bot that forwards modmail to Discord. A daily thread creator. A simple leaderboard game. Ship something in a weekend.</p>
 
-  <p><strong>2. Use the skills file.</strong> The <code>skills.md</code> file in this repo is your AI agent's reference manual. Feed it to opencode, Claude Code, or Cursor. It contains every pattern, gotcha, and code template you'll need. Your AI assistant becomes a Devvit expert instantly.</p>
+  <p><strong>2. Use the skills file.</strong> The <code>skills.md</code> file in this repo is your AI agent's reference manual (40+ repos analyzed). Feed it to opencode, Claude Code, or Cursor. It contains every pattern, gotcha, and code template you'll need. Your AI assistant becomes a Devvit expert instantly.</p>
 
   <p><strong>3. Join the community.</strong> The <a href="https://www.reddit.com/r/devvit/" target="_blank">r/devvit</a> subreddit and the <a href="https://developers.reddit.com/discord" target="_blank">Devvit Discord</a> are full of devs who've shipped. They'll help you debug, review your code, and celebrate your launch.</p>
 

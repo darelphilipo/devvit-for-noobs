@@ -1,6 +1,7 @@
 ﻿# Devvit App Development â€” LLM Agent Skills Reference
 
-> **Purpose:** Comprehensive reference for coding agents and vibe coders to build Reddit Devvit apps. Covers architecture, Redis, triggers, schedulers, bridges, game integration, MCP, Stitch, and 30+ repo patterns.
+> **Purpose:** Comprehensive reference for coding agents and vibe coders to build Reddit Devvit apps. Covers architecture, Redis, triggers, schedulers, bridges, game integration, MCP, Stitch, and 40+ repo patterns.
+> ⚠️ **CRITICAL: Blocks UI removed in v0.13.0. Support ends June 30, 2026. All new apps MUST use Devvit Web (`@devvit/web`). See [Blocks Migration](#-blocks-ui-deprecated---migrate-to-devvit-web) below.**
 
 ---
 
@@ -9,6 +10,7 @@
 ### Prerequisites
 - Node.js v22.2.0+, VS Code, Reddit account, GitHub account
 - Install CLI: `npm install -g @devvit/cli` (on Windows: `devvit-cli`, NOT `devvit`)
+- ⚠️ **Blocks UI is END OF LIFE.** Removed from `@devvit/public-api` in v0.13.0. Support drops from all Reddit clients **June 30, 2026**. All NEW apps must use **Devvit Web** (`@devvit/web`). Existing Blocks apps must migrate before the deadline.
 
 ### Creating Your First App
 ```powershell
@@ -145,32 +147,49 @@ npx devvit login                     # Re-login if needed
 
 ## 2. Architecture Decision Tree
 
+> **WARNING:** `@devvit/public-api` (Blocks) is REMOVED in v0.13.0. Support ends June 30, 2026. ALL new apps must use **Devvit Web** (`@devvit/web`). See [Blocks Migration](#-blocks-ui-deprecated---migrate-to-devvit-web) above.
+
 ```
 What are you building?
 
-  Mod Tool - "Bare" template
-    Triggers + Menu Actions + Redis. No UI needed.
+  Mod Tool — Use "React" template (or mod-tool-devvit-web template)
+    ← devvit.json triggers + menu actions + Redis + optional Webview UI
+    ← No Blocks needed — use /internal/* endpoints for menu actions
 
-  Game - "React" or "Phaser/Three.js" template
-    Devvit Web (HTML/iframe) + Redis + Scheduler. Client/Server split with HTTP API.
+  Game — Use "React" / "Phaser" / "Three.js" / "Unity" template
+    ← Devvit Web (React + Vite) + Redis + Scheduler. Client/Server split with HTTP API.
+    ← PixiJS 8 + React 19 (official prisma-game example)
 
-  Notification Bot - "Bare" template
-    Triggers + HTTP fetch (webhooks). Single file is fine.
+  Notification Bot — Use "React" template (minimal UI)
+    ← Triggers + HTTP fetch (webhooks). Single devvit.json + server file is fine.
 
-  Community App - "React" template
-    Devvit Web + Redis + Scheduler. Full client/server with multi-step UI.
+  Community App — Use "React" template
+    ← Devvit Web (React + Tailwind 4 + Hono) + Redis + Scheduler + optional Realtime
+    ← Full client/server with tRPC or Hono routing
 
-  Data/Utility Library - Monorepo
-    Separate packages: pure TS lib + thin Devvit wrapper.
+  Data/Utility Library — Monorepo (npm workspaces)
+    ← packages/my-lib/ (pure TS) + packages/my-devvit/ (thin Devvit wrapper)
 ```
 
+### Official Templates (as of June 2026)
+| Template | Stack | Use Case |
+|----------|-------|----------|
+| [React starter](https://github.com/reddit/devvit-template-react) | React 19, Vite, Hono, Tailwind 4, tRPC v11 | General web apps (recommended for most apps) |
+| [Three.js starter](https://github.com/reddit/devvit-template-threejs) | Three.js, Vite, Express | 3D games/visualizations |
+| [Phaser starter](https://github.com/reddit/devvit-template-phaser) | Phaser, Vite, Express | 2D games (physics, animations, sound) |
+| [Unity starter](https://github.com/reddit/devvit-template-unity) | Unity WebGL | Large-scale 3D games |
+| [GameMaker starter](https://github.com/reddit/devvit-template-gamemaker) | GameMaker HTML5 | 2D games via GameMaker |
+| [Payments template](https://github.com/reddit/devvit-template-payments) | Devvit Web | In-app purchases boilerplate |
+| [Mod tool (Web)](https://github.com/reddit/devvit-template-mod-tool-devvit-web) | Hono, Vite, TypeScript | Mod tools with Devvit Web (instead of Blocks) |
+
 ### Inline vs Expanded
-| Aspect | Inline (`inline: true`) | Expanded |
-|--------|------------------------|----------|
+| Aspect | Inline (default) | Expanded |
+|--------|------------------|----------|
 | Behavior | Loads directly in post | Shows "Launch App" button |
 | Use for | Games, simple tools | Complex apps with large UIs |
 | External requests | Blocked from client | Allowed |
 | Mobile scrolling | Cannot scroll internally | Can scroll |
+| `inline` property in devvit.json | **Deprecated** (always implied) | N/A |
 
 ---
 
@@ -210,31 +229,49 @@ packages/
 
 ### Non-Negotiable Rules for All Projects
 - Server builds MUST output CJS (CommonJS), client to ESM
-- Use `@devvit/web/server` imports (NOT `@devvit/public-api`) for server code
+- Use `@devvit/web/server` imports for server code — `@devvit/public-api` is Blocks-only (removed)
 - Routes: `/api/*` = client calls, `/internal/*` = triggers/scheduler/menu
 - NEVER use `onclick` attributes in HTML - always `addEventListener`
 - Always include hardcoded fallback data in HTML for instant rendering
 - Redis writes are eventually consistent - don't immediately verify writes
+- Use `fetch('/api/...')` for client→server — NOT `window.parent.postMessage`
+- Never fetch `reddit.com/r/.../.json` unauthenticated (blocked since May 28, 2026)
+- Design for Logged Out Users — show `showLoginPrompt()` for gated features
 
 ---
 
 ## 4. Server Architecture Patterns
 
-### Available Server APIs
-| API | Import from | Usage |
-|-----|------------|-------|
+### Available Server APIs (`@devvit/web/server`)
+| API | Import | Usage |
+|-----|--------|-------|
 | `redis.get/set/hGetAll/hSet/hDel/zAdd/zCard/zScore/zRem/zRange` | `@devvit/web/server` | Data persistence |
 | `reddit.submitCustomPost/getModerators/getCommentById/sendPrivateMessage` | `@devvit/web/server` | Reddit actions |
 | `context.username/subreddit/postId/postData` | `@devvit/web/server` | Request metadata |
 | `scheduler.runJob` | `@devvit/web/server` | Schedule jobs |
 | `settings.get(key)` | `@devvit/web/server` | Read settings |
 | `getServerPort()` | `@devvit/web/server` | Auto-detect port |
+| `media.upload({url, type})` | `@devvit/web/server` | Upload images (20MB max, PNG/JPEG/WEBP/GIF) |
+| `realtime.send(channel, msg)` | `@devvit/web/server` | Push live events to webview clients |
+
+### Available Client APIs (`@devvit/web/client`)
+| API | Import | Usage |
+|-----|--------|-------|
 | `navigateTo(url)` | `@devvit/web/client` | Navigate in Reddit browser |
+| `showToast({text, appearance})` | `@devvit/web/client` | Show toast notification |
+| `showForm({title, fields})` | `@devvit/web/client` | Show Devvit form dialog |
+| `showShareSheet({title, text})` | `@devvit/web/client` | Native share sheet |
+| `showLoginPrompt()` | `@devvit/web/client` | Prompt user to log in |
+| `getWebViewMode()` | `@devvit/web/client` | Detect inline vs expanded mode |
+| `requestExpandedMode()` | `@devvit/web/client` | Request full-size iframe |
+| `connectRealtime({channel, onMessage})` | `@devvit/web/client` | Subscribe to Realtime channel |
 
 ### NOT Available in Devvit Web
 - `reddit.modMail.createConversation()` - Not available
 - `scheduler.on("name", handler)` - Does not exist; use endpoint-based scheduler instead
 - `settings.get()` without args - Returns undefined; always pass key
+- `window.parent.postMessage` - Not needed; use `fetch('/api/...')` instead
+- `addCustomPostType()` - Removed entirely. Use `devvit.json` entrypoints
 
 ### UiResponse Pattern — Server Returns Declarative UI (Community Chats)
 Instead of client-side routing, the server returns `UiResponse` objects. The Devvit platform renders the UI:
@@ -407,7 +444,7 @@ This is the stack Reddit's own Community Chats app uses — production-grade, wo
 | **Lucide React** | Tree-shakeable icons, consistent pixel-perfect sizing | Import only icons you use |
 | **clsx + tailwind-merge** | Conditional classes without style conflicts | Standard combo in Tailwind apps |
 
-### Community Library Ecosystem (from 30+ repos)
+### Community Library Ecosystem (from 40+ repos)
 
 **Framework split across production apps:**
 | Framework | Used By | When |
@@ -475,27 +512,73 @@ This is the stack Reddit's own Community Chats app uses — production-grade, wo
 |---------|---------|---------|
 | `devvit-helpers` | automodmail, modmail-userinfo, bot-bouncer | Shared Devvit utilities (validators, Reddit API wrappers) |
 | `@fsvreddit/fsv-devvit-helpers` | sub-stats-bot, automodmail, modmail-userinfo, evasion-guard | fsvreddit's shared helpers (dedup, raw API access) |
+| `@fsvreddit/fsv-devvit-web-helpers` | (NEW) | Devvit Web-specific helpers (HTTP middleware, Realtime, cached mod checks) |
 | `toolbox-devvit` | modmail-userinfo | Toolbox wiki-as-database integration |
+| `devvit-state` | (NEW) foreverest | Atomic versioned state sync with Redis + Realtime + Zod |
+| `@devvit/kit` | Official Reddit | UI components (Columns, Pagination, DevToolbar) |
+
+**New fsvreddit repos (Apr–Jun 2026):**
+| Repo | Description | Pattern |
+|------|-------------|---------|
+| `yt-infoapp` | Posts YouTube video info comments | Content enrichment (beyond pure moderation) |
+| `modmailtranslate` | Inline modmail translation | Multi-language mod tool |
+| `deapprover` | Undoes post approvals | Reverse-action mod tool |
+| `appeal-advisor` | Appeal handling (early stage) | User appeal workflow |
+| `fsv-devvit-helpers` | General helpers extracted from apps | Modularization: extract shared libs |
+| `fsv-devvit-web-helpers` | Web-specific helpers | Devvit Web middleware pattern |
 
 ### Devvit-Specific Imports
 ```typescript
 // Server (src/server/) — available as magical imports
-import { context, redis, reddit } from '@devvit/web/server';
+import { context, redis, reddit, realtime, media } from '@devvit/web/server';
 import type { UiResponse, TriggerResponse } from '@devvit/web/shared';
 
 // Client (src/client/) — browser-safe Devvit APIs
-import { getWebViewMode, requestExpandedMode, showForm, showToast, navigateTo } from '@devvit/web/client';
+import { getWebViewMode, requestExpandedMode, showForm, showToast, navigateTo, showShareSheet, showLoginPrompt, connectRealtime } from '@devvit/web/client';
 
 // Build tooling
 import { devvit } from '@devvit/start/vite';  // Vite plugin
 import { getServerPort, createServer } from '@devvit/web/server';  // Server boot
+
+// Official UI components
+import { Columns, ItemPagination, DevToolbar } from '@devvit/kit';
 ```
 
 ---
 
-## Devvit v0.13 (May 2026) — New Capabilities
+## ⚠️ Blocks UI Deprecated — Migrate to Devvit Web
 
-### Push Notifications (`@devvit/notifications` — experimental)
+**Blocks was removed from `@devvit/public-api` in v0.13.0 (May 26, 2026). Support ends on ALL Reddit clients June 30, 2026.**
+
+### What Changed
+| Old (Blocks / public-api) | New (Devvit Web) |
+|---------------------------|-------------------|
+| `Devvit.addCustomPostType(...)` | Removed. Use `@devvit/web` entrypoints in `devvit.json` |
+| `useWebView(...)` | Removed. Use `fetch('/api/...')` HTTP calls |
+| `useChannel(...)` / `realtime.send(...)` | `@devvit/web/server` only — `realtime.send(channel, msg)` |
+| `Devvit.addMenuItem({onPress: showForm})` | `devvit.json` menu items with `/internal/menu/` endpoints |
+| `Context.kvStore` | Removed. Use `redis.get/set` directly |
+| `@devvit/payments` (Blocks hooks) | Removed. Web-only payments via devvit.json |
+| `@devvit/security` | Package removed entirely |
+| `@devvit/pushnotif` | Package removed. Use `@devvit/notifications` (experimental) |
+| `splash`/`loading` in `submitCustomPost()` | Removed. Use dedicated entrypoint HTML pages |
+| `inline` property in devvit.json | Deprecated (always implied now) |
+
+### Migration Steps
+1. Create new app with `devvit-cli init` → select "React" template
+2. Move server logic to `src/server/` with Express/Hono routes
+3. Move UI to `src/client/` with React + Tailwind
+4. Define triggers + menu items + scheduler in `devvit.json`
+5. Replace `postMessage` bridge with `fetch('/api/...')` HTTP calls
+6. Test on mobile AND desktop before the June 30 deadline
+
+---
+
+## Devvit v0.13 — Latest Platform Capabilities (v0.13.3, June 8, 2026)
+
+> Current latest: **v0.13.3** (June 8, 2026). No v0.14 released yet. Next-in-line: v0.13.4-next.
+
+### Push Notifications (`@devvit/notifications` — experimental, gated beta)
 ```typescript
 import { notifications } from '@devvit/notifications';
 await notifications.optInCurrentUser();
@@ -504,7 +587,7 @@ await notifications.enqueue({
   recipients: [{ userId: 'abc', data: { streak: '5' } }], // Mustache: {{streak}}
 });
 ```
-Rate limits: 2/user/day, 25K/app/day. Built-in opt-in/opt-out UX.
+Rate limits: 2/user/day, 25K/app/day. Built-in opt-in/opt-out UX. Requires approval to use.
 
 ### Streak System (Redis bitmap-based)
 ```typescript
@@ -524,12 +607,25 @@ import { showLoginPrompt, showShareSheet } from '@devvit/web/client';
 showShareSheet({ title: 'My Score', text: 'I scored 9000!', data: 'abc' });
 ```
 
+**Logged Out Users** (v0.13.0, stable): Design apps playable without Reddit login. ShowLoginPrompt for gated features. Requires pattern: check auth state, show login CTA for gated content, show limited UI for anonymous users.
+
 ### Post Styles + User Actions
 ```typescript
 await reddit.submitCustomPost({ styles: { backgroundColor: { light: '#FFF', dark: '#000' } } });
 await post.setCustomPostStyles({ shareImageUrl: 'https://...' });
 // runAs: 'USER' now requires app review approval
+
+// iOS/Android height fix: inline webview renders too short on mobile
+await reddit.submitCustomPost({ styles: { height: 'TALL' } });
 ```
+
+### Devvit Journeys (v0.13.0, experimental, gated beta)
+Session lifecycle telemetry — tracks user starts, completions, engagement, session frequency/duration:
+```typescript
+import { journeys } from '@devvit/journeys';
+journeys.track({ event: 'level_complete', data: { level: 5, score: 1000 } });
+```
+**Event Receipts** (v0.13.3): Feedback on telemetry event processing (success/skip/reject/rate-limit).
 
 ### Scheduler: Second-Level Cron (experimental)
 6-part cron: `*/30 * * * * *` = every 30 seconds.
@@ -539,6 +635,15 @@ await post.setCustomPostStyles({ shareImageUrl: 'https://...' });
 await realtime.send(channel, msg); // Server. No ':' in channel names.
 const conn = connectRealtime({ channel, onMessage }); // Client
 ```
+
+### Unauthenticated .json Endpoints Blocked (May 28, 2026)
+Reddit deprecated unauthenticated `.json` access. `https://reddit.com/r/sub/.json` now returns 403 without auth. Apps that scrape Reddit JSON must:
+- Use Devvit's Reddit API (`reddit.getPost()`, `reddit.getComment()`) instead
+- Or use OAuth-authenticated requests
+- RSS endpoints may be blocked next
+
+### Crosspost Parent ID
+New field on `Post` object: `crosspostParentId` identifies original crosspost source.
 
 ### New Dependencies Added
 | Library | Source | Purpose |
@@ -566,6 +671,64 @@ Manual switch-case routing, 19 RSS host providers, visibilitychange mobile reloa
 
 **Gini Coefficient Workload Imbalance** (Modlytics):
 Pure computation engine (zero Devvit imports) with statistical math for burnout detection. Interface-based adapter separates core logic from Devvit runtime.
+
+### New Patterns (June 2026)
+
+**Atomic Versioned State Sync** (devvit-state):
+Server-authoritative state with Realtime broadcast + Zod schemas:
+```typescript
+import { createStore } from 'devvit-state';
+
+// Server: define schema, publish changes
+const store = createStore({ schema: z.object({ score: z.number() }) });
+await store.publish('game:123', { score: 100 }); // Realtime broadcast
+
+// Client: subscribe and sync
+store.subscribe('game:123', (state) => setScore(state.score));
+```
+Published as npm package (`devvit-state` v0.3.0). Uses Redis transactions + strict versioning + Devvit Realtime.
+
+**AutoMod Visual Workflow** (automod-visualiz):
+Interactive DAG-based visualization of AutoMod YAML rules:
+- React Flow + Monaco Editor + Zustand + Framer Motion
+- Converts YAML → visual workflow graph and back
+- `https://github.com/Anxhul10/automod-visualiz`
+
+**Local Dev Proxy (no upload needed)** (devvit-local-dev-template):
+```typescript
+import { redis, reddit, context } from './devvitProxy';
+// Same API as @devvit/web/server — works locally AND on Devvit
+// Uses @devvit/test mocks internally. No upload required for every change.
+```
+
+**Content Enrichment Bot** (yt-infoapp, fsvreddit):
+Posts informational comments about YouTube links in threads. Pattern: trigger on PostSubmit/CommentSubmit → detect URL → fetch metadata → reply with summary. New category: content enrichment (beyond moderation).
+
+**Modmail Translation App** (modmailtranslate, fsvreddit):
+Translates modmail conversations inline. Pattern: trigger on ModMail → detect language → translate → attach translation to dashboard.
+
+**Helper Library Ecosystem** (fsv-devvit-helpers, fsv-devvit-web-helpers):
+Two new shared utility packages extracted from the fsvreddit app suite:
+- `fsv-devvit-helpers`: General Devvit utilities (validators, Reddit API wrappers, dedup)
+- `fsv-devvit-web-helpers`: Devvit Web-specific helpers (HTTP middleware, Realtime helpers, cached mod checks)
+
+**PixiJS 8 + React 19 Combo** (reddit/devvit-prisma-game):
+Official Reddit example combining PixiJS 8 canvas rendering with React 19 UI overlay within Devvit Web. Pattern: React wraps PixiJS canvas, server runs Hono API routes for multiplayer state.
+
+**DEFCON RED — Declarative Scenario DSL** (reddit/devvit-defcon-red-game):
+Presidential crisis simulator using a declarative scenario DSL + deterministic game loop + optional Gemini AI dialogue. Pattern: Define game scenarios as typed JSON, engine evaluates player choices deterministically.
+
+### Hackathon Apps (Mod Tools & Migration, Apr–May 2026)
+
+These apps were built for the official Reddit hackathon and are published on the Developer Portal:
+
+| App | Creator | What It Does | Pattern |
+|-----|---------|-------------|---------|
+| **RepostRadar** | MANSWINIPS | One-click repost detection via post menu, ranked duplicates, stickied removal comment | Sorted-set fingerprint index |
+| **AI Mod Suite** | AccelerateToTheSingularity | AI rule enforcement, summarization, contributor recognition (Gemini or OpenAI) | Multi-model AI pipeline |
+| **ContextMod** | StephenSook | JSON5 rule engine, live telemetry dashboard, dry-run tester, AI explainer (ported from PRAW) | Porting guide: PRAW → Devvit Web |
+| **ModPulse** | AstaadDahiya | Real-time community health dashboard, event-driven (zero polling), weekly digests | Trigger-only architecture (no CRON) |
+| **My TL;DR** | 0xMarcAurel | AI post summaries via Gemini 2.5 Flash, one-click mod menu → stickied comment | ModMenu + AI on-demand |
 
 ## 5. Redis Patterns
 
@@ -1156,10 +1319,16 @@ await Promise.allSettled([
 
 ## 10. Devvit Blocks <-> WebView Bridge
 
-### IMPORTANT: Blocks is deprecated. Use Devvit Web (`@devvit/web/server`) for all new apps.
+### ❌ REMOVED (June 2026) — Blocks UI no longer exists
 
-### Old Pattern (deprecated - useWebView):
+Blocks and `useWebView()` were **removed in v0.13.0** (May 26, 2026). Support ends on all Reddit clients **June 30, 2026**.
+
+**Do NOT use `window.parent.postMessage` in new apps.** All communication is now HTTP-based via `fetch('/api/...')`.
+
+### Archived Reference (for migrating old code):
+The old pattern used `useWebView()` + `postMessage` bridge:
 ```typescript
+// ❌ OLD BLOCKS PATTERN — DO NOT USE
 const { mount, postMessage } = useWebView({
   url: 'index.html',
   onMessage: async (ev) => {
@@ -1170,14 +1339,9 @@ const { mount, postMessage } = useWebView({
   },
 });
 
-// WebView side:
 window.parent.postMessage({ type: 'save:score', data: { score: 100 } }, '*');
-window.addEventListener('message', (ev) => {
-  if (ev.data.type !== 'devvit-message') return; // Devvit wraps in devvit-message
-  const { message } = ev.data.data;
-  // handle message
-});
 ```
+
 
 ### New Pattern (Devvit Web - HTTP):
 ```typescript
@@ -1543,6 +1707,9 @@ describe('trimArray', () => {
 - [ ] Click "Update" on developer portal after upload
 - [ ] Run `npx devvit whoami` to confirm logged in
 - [ ] Verify Node.js >= 22.2.0
+- [ ] **Blocks migration check:** Are you using `@devvit/web`? (Not `@devvit/public-api`)
+- [ ] **JSON check:** Are you fetching `reddit.com/.json` without auth? (Blocked)
+- [ ] **Logged Out check:** Does the app handle anonymous users gracefully?
 
 ---
 
@@ -1583,25 +1750,69 @@ Publishing a new version does NOT auto-update installed subreddits. Each must up
 
 ## 18. Ready-to-Use Code Templates
 
-### Template A: Simple Notification Bot (single-file)
+### Template A: Simple Notification Bot (single trigger file + devvit.json)
+```json
+// devvit.json — triggers + settings + permissions
+{
+  "triggers": {
+    "events": { "ModMail": { "endpoint": "/internal/triggers/modmail" } }
+  },
+  "settings": {
+    "subreddit": {
+      "webhookURL": { "type": "string", "label": "Slack/Discord Webhook URL" }
+    }
+  },
+  "permissions": { "http": { "enable": true }, "redis": { "enable": true } }
+}
+```
 ```typescript
-Devvit.configure({ redditAPI: true, redis: true, http: true });
-Devvit.addTrigger({ event: 'ModMail', onEvent: async (event, context) => {
-  const conversation = await context.reddit.modMail.getConversation({ conversationId: event.conversationId });
+// src/server/index.ts
+import express from 'express';
+import { createServer, redis, context, getServerPort } from '@devvit/web/server';
+const app = express();
+const router = express.Router();
+
+router.post('/internal/triggers/modmail', async (req, res) => {
+  const { conversationId } = req.body;
+  const dedupKey = `handled~${conversationId}`;
+  if (await redis.exists(dedupKey)) return res.json({ status: 'ok' });
+  await redis.set(dedupKey, 'true', { expiration: addDays(new Date(), 28) });
+
   const webhook = await context.settings.get<string>('webhookURL');
-  if (webhook?.startsWith('https://hooks.slack.com/')) {
-    await fetch(webhook, { method: 'POST', body: JSON.stringify({ text: `*New Modmail:* ${conversation.subject}` }) });
-  }
-}});
+  if (webhook) await fetch(webhook, { method: 'POST', body: JSON.stringify({ text: `New Modmail` }) });
+  res.json({ status: 'ok' });
+});
+
+app.use(router);
+createServer(app).listen(getServerPort());
 ```
 
-### Template B: Mod Tool with Menu Action (4-file)
+### Template B: Mod Tool with Menu Action (Devvit Web)
+```json
+// devvit.json
+{
+  "menu": {
+    "items": [{
+      "label": "Restrict to Flaired",
+      "location": "post",
+      "forUserType": "moderator",
+      "endpoint": "/internal/menu/restrict"
+    }]
+  }
+}
+```
 ```typescript
-// main.ts - Wiring
-Devvit.addMenuItem({ label: 'Restrict to Flaired', location: 'post', forUserType: 'moderator', onPress: showForm });
-// handlers.ts - Logic + forms
-// storage.ts - Redis CRUD: storePostSettings, getPostSettings, clearPostSettings
-// settings.ts - Form field definitions + validators
+// src/server/index.ts — Express routes
+router.post('/internal/menu/restrict', async (req, res) => {
+  // Menu action handlers return UiResponse
+  res.json({ showForm: {
+    title: 'Restrict Post',
+    fields: [{ name: 'duration', type: 'number', label: 'Hours', required: true }],
+    acceptLabel: 'Apply'
+  }});
+});
+// storage.ts — Redis CRUD: storePostSettings, getPostSettings, clearPostSettings
+// settings.ts — Form field definitions + validators in devvit.json
 ```
 
 ### Template C: Game with Express Backend
@@ -1704,9 +1915,16 @@ document.querySelectorAll('.btn-next').forEach(btn => {
 | Check `postId.startsWith("t3_")` before using in APIs | Assume postId always has t3_ prefix (it doesn't) |
 | Use in-app confirmation UI | Use browser `confirm()` (blocked by CSP) |
 | Split sensitive data (Mod view vs Public view) | Show email/phone to all users |
+| Use **Devvit Web** (`@devvit/web`) for ALL new apps | Use `@devvit/public-api` (Blocks — removed in v0.13, ends June 30, 2026) |
+| Migrate old Blocks apps to Devvit Web before June 30 | Ignore the June 30 Blocks removal deadline |
+| Use `fetch('/api/...')` for client→server communication | Use `window.parent.postMessage` (old Blocks bridge pattern) |
+| Use `showForm()` from `@devvit/web/client` for forms | Build custom HTML forms with validation from scratch |
+| Use `@devvit/web/client` imports for frontend APIs | Import browser-only APIs in Devvit server code |
+| Use Reddit API via `reddit.*` methods for data | Fetch `reddit.com/r/.../.json` unauthenticated (blocked since May 28, 2026) |
+| Design for Logged Out Users (showLoginPrompt for gated features) | Assume every user is always logged in |
 
 ---
 
-> Built from: Reddit Devvit official docs + 30+ community repos analyzed for production patterns.
+> Built from: Reddit Devvit official docs + 40+ community repos analyzed for production patterns.
 > Questions? Join r/devvit or the Devvit Discord: https://developers.reddit.com/discord
 
