@@ -1941,6 +1941,15 @@ if (context.subredditName !== EXPECTED) throw new Error('Wrong subreddit');
 | `process.env` is undefined in Devvit runtime | Use app-scoped settings for API keys: `context.settings.get('myKey')` |
 | No `dotenv`, no `.env` files, no env var SDK config | Settings-based pattern for all secrets — AWS/Stripe SDKs that require env vars won't work directly |
 | Tab rapid-click causes API flood | Add debounce flag: `if (loading) return; loading = true;` |
+| `sendPrivateMessage({ to: "/r/subreddit" })` (modmail) | ✅ Works from CRON context (tested 2026-05-27) |
+| `sendPrivateMessage({ to: "username" })` (individual DM) | ❌ Fails with ERR_INVALID_ARG_TYPE — not available in Devvit Web |
+| `select` settings return `string[]` not `string` | Unwrap: `Array.isArray(v) ? v[0] : v` — Devvit SelectField is BaseField<string[]> |
+| CRON context has no `context.postId` | Triggers from server, not user post — different execution context than webview |
+| `runAs: 'USER'` permissions | Requires explicit approval in devvit.json — supported: submitPost, submitCustomPost, submitComment |
+| Redis Transactions (`watch`/`multi`/`exec`) | Available in Devvit Web — max 20 concurrent, 5s timeout |
+| `requestExpandedMode()` | Incompatible with overlay DOM architectures — use scroll buttons or multi-step forms instead |
+| Dead code calling broken APIs | Remove or convert to no-op with log — `submitComment()`, `sendPrivateMessage(username)` are broken |
+| Usernames stored with `u/` prefix | Always normalize before re-prefixing — `stripUsernamePrefix()` helper prevents `u/u/username` |
 
 ### Self-Healing
 ```typescript
@@ -1952,6 +1961,147 @@ if (!mods) { await refreshModerators(context); mods = await redis.get('mods'); }
 const missing = expectedJobs.filter(n => !allJobs.some(j => j.name === n));
 if (missing.length > 0) await recreateAllJobs(context);
 ```
+
+---
+
+### Battle-Tested Production Patterns
+
+#### Logging Requirements (Devvit Web)
+
+**`console.log` does NOT surface in Devvit Web inline webview.** The only way to debug production issues is via:
+- **Server logs:** `devvit-cli logs r/your_subreddit` (terminal only)
+- **Client logs:** Custom on-screen debug panel with copy-to-clipboard
+
+**Rule:** Every new feature MUST add logging:
+
+1. **Client-side** — Use a `log()` function (not `console.log`):
+```typescript
+function log(msg: string) {
+  const panel = document.getElementById('debug-entries');
+  if (panel) panel.innerHTML += `<div class="log-entry">${msg}</div>`;
+  // Also store in localStorage for persistence
+}
+log("featureName action=id state=detail");
+```
+
+2. **Server-side** — Use `console.log()` with structured prefixes:
+```typescript
+console.log(`[FEATURE] action detail | key=value`);
+```
+
+3. **Critical paths to log:** Entry/exit of handlers, state mutations, error paths, external API calls.
+
+#### CRON Scheduler: The Only Reliable Background Pattern
+
+**One-shot `scheduler.runJob()` never fires in Devvit Web inline context** (empirically confirmed). Only CRON-based scheduler works.
+
+**Hybrid architecture pattern:**
+```
+Devvit Web (HTML/CSS/JS) → User-facing UI (forms, overlays, navigation)
+CRON scheduler (*/5 min) → Background tasks (scans, reminders, alerts)
+Redis → Shared data layer between both contexts
+```
+
+**CRON context differences:**
+- ✅ Has: `redis`, `reddit.submitCustomPost()`, `reddit.sendPrivateMessage({to: "/r/subreddit"})`
+- ❌ Missing: `context.postId` (triggers from server, not user post)
+- ❌ Broken: `reddit.submitComment()`, `sendPrivateMessage({to: "username"})`
+
+**CRON best practices:**
+- Use Redis TTL flags to prevent duplicate processing on next tick
+- Wrap each API call in individual try-catch (one failure doesn't stop the loop)
+- Log every event with `[CRON]` prefix for easy filtering
+- Return `{ status: "ok" }` with HTTP 200
+
+#### Security Patterns (Production-Tested)
+
+**PII cleanup on leave/delete:** When a user leaves an event or a mod deletes it, explicitly clean up email/phone from Redis hashes. Redis doesn't auto-expire or cascade-delete.
+
+**Validate entity existence before writing:** Never assume the client sends valid IDs. Check the entity exists before performing operations on it.
+
+**Return 404 for missing entities:** Don't silently succeed when a resource is not found. Return explicit error with status 404.
+
+**Never use empty string as Redis member key:** If `context.username` is empty, reject with 401. Empty keys cause data corruption when multiple unauthenticated requests collapse into the same key.
+
+**Username auth gating:** Always check `context.username` is non-empty before writing to Redis:
+```typescript
+const username = context.username;
+if (!username) return { error: "Authentication required", status: 401 };
+```
+
+**CSV formula injection prevention:** When exporting data to CSV, prefix fields starting with `=`, `+`, `-`, `@`, `\t`, `\r` with a single quote to prevent Excel formula execution:
+```typescript
+function csvEscape(value: string | null | undefined): string {
+  if (value == null) return "";
+  let v = String(value);
+  if (/^[=+\-@\t\r]/.test(v)) v = "'" + v;
+  return `"${v.replace(/"/g, '""')}"`;
+}
+```
+
+#### iOS Safari Gotchas
+
+**`height:100%` inside flex containers** — iOS Safari resolves as `auto` instead of filling parent. Fix: use `position: absolute; top:0; left:0; right:0; bottom:0` to lock elements to parent bounds.
+
+**Blank webview after `navigateTo()` + Back** — On iOS, calling `navigateTo(url)` then tapping Back often shows a blank white screen. Fix: Add a `visibilitychange` listener that re-renders the active surface when the page becomes visible again:
+```typescript
+document.addEventListener("visibilitychange", function() {
+  if (document.visibilityState !== "visible") return;
+  // Soft-render: re-fetch data and re-render current view
+  if (modOverlay active) loadModTab(modTab);
+  else if (myStuff active) loadMySubmissions();
+  else loadHome();
+});
+```
+Key: Use soft-render (re-fetch + re-render current card), not hard re-init (which wipes open overlays and form state).
+
+**Flex child min-width trap** — Flex children default to `min-width: auto` which prevents shrinking. Always set `min-width: 0` on flex children that need to truncate or scroll horizontally.
+
+#### Event Delegation Pattern (Don't Mix with Direct Listeners)
+
+Use a single `data-action` attribute + one `document.body` listener. Never add direct `addEventListener` calls on the same elements — mixing causes silent double-fires.
+
+```html
+<button data-action="approve" data-id="event_123">Approve</button>
+```
+```typescript
+document.body.addEventListener("click", function(e) {
+  const target = e.target as HTMLElement;
+  const action = target.getAttribute("data-action");
+  const id = target.getAttribute("data-id");
+  if (!action) return;
+  switch(action) {
+    case "approve": approveEvent(id); break;
+    case "delete": deleteEvent(id); break;
+  }
+});
+```
+
+**Per-instance pagination lock:** For rapid-click pagination (Prev/Next), use item-ID-keyed locks:
+```typescript
+var locks: Record<string, boolean> = {};
+function isLocked(key: string) { return !!locks[key]; }
+function lock(key: string) { locks[key] = true; }
+function unlock(key: string) { delete locks[key]; }
+
+// In handler:
+case "next":
+  var lockKey = "nav-" + id;
+  if (isLocked(lockKey)) return;
+  lock(lockKey);
+  // ... increment, re-render ...
+  setTimeout(() => unlock(lockKey), 300);
+```
+
+#### Code Safety Patterns
+
+**Don't delete server code near helper functions without checking dependencies.** Deleting "dead" functions that share helpers with live code can crash the app. Always search for references before touching any function.
+
+**Safe approach: one edit, one build, one test.** Apply ONE change → build → verify. Never batch-delete blocks that span multiple function boundaries.
+
+**Dead code calling broken APIs is a trap.** Either remove it or make it a no-op with a clear log message. Never leave it looking functional — it misleads future developers.
+
+**`requestExpandedMode()` is incompatible with overlay DOM architectures.** Games and chat apps use it because they render one canvas/view. Apps with 6+ overlays (details, forms, mod dashboard) will break because DOM elements are destroyed when inline HTML is replaced.
 
 ---
 
