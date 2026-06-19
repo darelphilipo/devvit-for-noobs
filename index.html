@@ -295,6 +295,28 @@ const sync = useCallback(async () => {
 setInterval(sync, 3000);</code></pre>
   <p><strong>Bonus:</strong> Every chat message is posted as a real Reddit comment (using <code>runAs: 'USER'</code>). This means AutoModerator, ban detection, and subreddit rules all apply automatically.</p>
 
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 6: Event Delegation (Don't Mix with Direct Listeners)</h4>
+  <p><em>Used by: Meetit, ContextMod, every production mod tool</em></p>
+  <p>Use a single <code>data-action</code> attribute + one <code>document.body</code> listener. Never add direct <code>addEventListener</code> calls on the same elements — mixing causes <strong>silent double-fires</strong> that are nearly impossible to debug. For rapid-click pagination, use per-instance locks keyed by item ID.</p>
+<pre><code>&lt;button data-action="approve" data-id="event_123"&gt;Approve&lt;/button&gt;
+
+// ONE listener on document.body — handles everything
+document.body.addEventListener("click", function(e) {
+  const action = e.target.getAttribute("data-action");
+  const id = e.target.getAttribute("data-id");
+  if (!action) return;
+  switch(action) {
+    case "approve": approveEvent(id); break;
+    case "delete":  deleteEvent(id);  break;
+  }
+});
+
+// Per-instance lock prevents rapid double-clicks
+var locks = {};
+function isLocked(key) { return !!locks[key]; }
+function lock(key) { locks[key] = true; }
+function unlock(key) { delete locks[key]; }</code></pre>
+
   <div class="note-box" style="margin-top:20px;">
     <div class="note-title">> PRODUCTION STACK (use these)</div>
     <p>The official Reddit Community Chats app uses: <strong>React 19 + Tailwind CSS 4 + Hono + Framer Motion + Lucide Icons</strong>. This stack is proven to work on Devvit Web. Skip Express for new projects — Hono is lighter and has better TypeScript support. Use Tailwind 4 (CSS-first config, no <code>tailwind.config.js</code>). Animate everything with Framer Motion — it makes your app feel native.</p>
@@ -323,11 +345,25 @@ setInterval(sync, 3000);</code></pre>
     <tr><td>Use <code>addEventListener</code> after every innerHTML change</td><td>Assume event listeners survive <code>innerHTML = ...</code> — they don't</td></tr>
     <tr><td>Build server as CJS, client as ESM</td><td>Use the same module format for both — Devvit requires CJS server</td></tr>
     <tr><td>Include fallback HTML for instant rendering</td><td>Wait for API response before showing anything — users see blank screen</td></tr>
+    <tr><td>Wrap <code>hDel</code> fields in array: <code>hDel(key, [field])</code></td><td>Pass single string — silently fails, data never deleted</td></tr>
+    <tr><td>Unwrap <code>select</code> settings: <code>Array.isArray(v) ? v[0] : v</code></td><td>Call <code>.startsWith()</code> on the result — it's an array, not a string</td></tr>
+    <tr><td>Use <code>sendPrivateMessage({ to: "/r/sub" })</code> for modmail</td><td>Use <code>sendPrivateMessage({ to: "username" })</code> — individual DMs fail in Devvit Web</td></tr>
+    <tr><td>Use <code>position: absolute</code> for full-viewport cards on iOS</td><td>Use <code>height: 100%</code> inside flex — iOS Safari resolves as <code>auto</code></td></tr>
   </table>
 
   <div class="warn-box" style="margin-top:16px;">
     <div class="warn-title">> THE SNEAKIEST BUG</div>
     <p>Redis writes can be <strong>eventually consistent</strong>. You call <code>zRem</code>, it returns 0, you panic. But the member IS removed — the read right after the write might show stale data. <strong>Trust the write. Don't verify immediately.</strong> Read again 1 second later and it'll be correct.</p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> THE iOS BLACK HOLE</div>
+    <p>On iOS, calling <code>navigateTo(url)</code> to push to a Reddit page, then tapping Back, often shows a <strong>blank white webview</strong>. The page chrome is gone. Fix: add a <code>visibilitychange</code> listener that re-renders the active surface when the page becomes visible again. Use <strong>soft-render</strong> (re-fetch + re-render current card), not hard re-init (which wipes open overlays and form state).</p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> THE CSV TRAP</div>
+    <p>When exporting data to CSV, a username starting with <code>=</code>, <code>+</code>, or <code>-</code> will be interpreted as a <strong>formula by Excel</strong> and may execute arbitrary code. Always prefix dangerous characters with a single quote: <code>'=cmd|...'</code>. Also, <strong>quote all fields</strong> — a comma in a username silently strips the comma instead of escaping it. Use RFC 4180 escaping: <code>"value"</code> with doubled inner quotes.</p>
   </div>
 </div>
 
@@ -439,6 +475,24 @@ setInterval(sync, 3000);</code></pre>
     <div class="warn-title">> DEVVIT-STATE (New Library)</div>
     <p>Atomic, versioned state sync for Devvit apps. Uses <strong>Redis transactions + strict versioning + Zod schemas + Devvit Realtime</strong> for server-authoritative state with automatic client sync. Published as <code>devvit-state</code> on npm (v0.3.0).</p>
     <p><a href="https://github.com/foreverest/devvit-state" target="_blank">github.com/foreverest/devvit-state</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> OVER9000GAMES</div>
+    <p>An AI-powered NES game generator that runs user-created JavaScript inside a <strong>QuickJS sandbox</strong> — both in the browser (async WASM) and on the server (sync CJS variant). Generates games via OpenAI Responses API, renders them in a 128x128 pixel console with 8-slot audio. <strong>Pattern to steal:</strong> Dual QuickJS environments, ESM loader hook testbed for local development, client-driven polling (no background workers).</p>
+    <p><a href="https://github.com/Strawberry-Computer/over9000games" target="_blank">github.com/Strawberry-Computer/over9000games</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">> SNOOSINGS</div>
+    <p>A networked drum machine / concert game where <strong>only 8.5% of the code touches Devvit</strong> (174 lines). The rest is pure TypeScript/Canvas/WebAudio. Uses <strong>post-scoped Realtime channels</strong> with throttled peer updates (300ms), 9s heartbeat, 30s disconnect timeout. <strong>Pattern to steal:</strong> Minimal Devvit surface area — keep game logic in a standard iframe, use Devvit only for auth + Realtime transport.</p>
+    <p><a href="https://github.com/reddit/devvit-snoosings" target="_blank">github.com/reddit/devvit-snoosings</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">> FIDDLESTICKS</div>
+    <p>A golf game using <strong>lit-html + Custom Elements</strong> instead of React. Built with esbuild-only (no webpack/vite), uses Constructable Stylesheets for CSS, seeded Park-Miller PRNG for deterministic boards, and SAT collision detection. <strong>Pattern to steal:</strong> lit-html is a lighter alternative to React for game webviews — smaller bundle, no JSX, no virtual DOM. The entire Devvit surface is only 672 lines.</p>
+    <p><a href="https://github.com/reddit/devvit-fiddlesticks" target="_blank">github.com/reddit/devvit-fiddlesticks</a></p>
   </div>
 </div>
 </div>
