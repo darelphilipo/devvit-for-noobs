@@ -1211,6 +1211,82 @@ export async function requireModerator(): Promise<ModAuthResult> {
 ```
 Key patterns: Hono modular routing (not Express), 3-tier idempotency (firstSeen NX → reserveAction 5min lock → commitAction 7d done marker), circuit breaker (CLOSED→OPEN→HALF_OPEN, fails open on Redis errors), fixed-window rate limiting (per-sub + per-user), `requireModerator()` defense-in-depth for HTTP-reachable custom posts, wiki config publish with immutable revisions and atomic pointer (read-once snapshot, invalid config doesn't bump pointer). Devvit Web, JSON5 rules, 8 rule kinds, 8 action handlers, perceptual-blockhash image-repost, AI explain-event, Observatory dashboard. Hackathon 2026 entry. (Source: `StephenSook/context-mod-devvit`. Verified from source code.)
 
+### [ai-mod-suite-devvit](https://github.com/AccelerateToTheSingularity/ai-mod-suite-devvit) — Swiss-Army-Knife AI Mod Tool
+```typescript
+// 1. esbuild bundling — no Vite needed for server-only apps
+// package.json: "build": "esbuild src/server/index.ts --bundle --platform=node --target=node22 --outfile=dist/server/index.js --format=cjs"
+// devvit.json: "server": { "dir": "dist/server", "entry": "index.js" }
+
+// 2. Safe mode pattern — DEFAULT ON, every action logged not executed
+const safeMode = await settings.get<boolean>('safe_mode') ?? true;
+if (safeMode) {
+  console.log(`[SAFE MODE] Would remove content ${targetId}. Reason: ${reason}`);
+  await logAuditEvent({ ..., safeMode: true, success: true, message: 'Would perform...' });
+  return; // Never touch Reddit
+}
+// Live mode: execute action + logAuditEvent({ safeMode: false })
+
+// 3. Settings validation endpoints — custom validation for API keys/models
+// devvit.json: "llm_api_key": { "validationEndpoint": "/internal/settings/validate-llm-key" }
+app.post('/internal/settings/validate-llm-key', async (c) => {
+  const body = await c.req.json<{ value?: unknown }>();
+  return c.json(validateLlmApiKeyValue(body?.value));
+});
+
+// 4. Select settings return string[] — unwrap with helper
+function getSingleSettingValue<T extends string>(value: any, defaultValue: T): T {
+  if (!value) return defaultValue;
+  if (Array.isArray(value)) return (value[0] ?? defaultValue) as T;
+  return value as T;
+}
+// Usage: const action = getSingleSettingValue(await settings.get('moderation_action'), 'report');
+
+// 5. Boolean settings — handle string/boolean/array variants
+function settingsFlag(value: unknown): boolean {
+  if (value === true || value === 'true') return true;
+  if (Array.isArray(value)) return settingsFlag(value[0]);
+  return false;
+}
+
+// 6. runAs: 'APP' — all bot comments posted as app identity
+await reddit.submitComment({ id: postId, text: commentText, runAs: 'APP' });
+// Distinguish to pin: await comment.distinguish(true);
+
+// 7. isAppAuthored check — prevent reacting to own content
+function isAppAuthored(authorName: string): boolean {
+  return authorName === 'YOUR_BOT_USERNAME'; // or check against settings
+}
+
+// 8. modMail API — send modmail programmatically
+await reddit.modMail.createModInboxConversation({
+  subject: `⚠️ Troll Alert: u/${username}`,
+  bodyMarkdown: `Average score: ${avgScore}\nComments: ${count}`,
+  subredditId: subId,
+});
+
+// 9. Idempotency (simpler pattern) — no NX, just get+set+expire
+async function hasProcessed(id: string): Promise<boolean> {
+  const key = `idemp:${id}`;
+  const existing = await redis.get(key);
+  if (existing) return true;
+  await redis.set(key, '1');
+  await redis.expire(key, 86400);
+  return false;
+}
+
+// 10. Milestone-based triggers — check count against thresholds
+const milestones = [20, 50, 100];
+for (const m of milestones) {
+  const key = `summary_milestone:${postId}:${m}`;
+  const alreadyDone = await redis.get(key);
+  if (commentCount >= m && !alreadyDone) {
+    // Generate summary at this milestone
+    await redis.set(key, '1');
+    await redis.expire(key, 86400 * 30);
+  }
+}
+```
+
 **Official Devvit App Patterns (reddit/devvit monorepo apps):**
 The `reddit/devvit` monorepo contains reference apps under `packages/apps/`:
 | App | Pattern |
