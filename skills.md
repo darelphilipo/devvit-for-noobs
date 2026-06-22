@@ -1143,6 +1143,74 @@ type WebViewMessage = { type: 'GameOver'; score: number } | { type: 'Loaded' } |
 ```
 Key patterns: esbuild-only build (no webpack/vite), shadow DOM isolation with `adoptedStyleSheets`, `useState2` overloaded wrapper (async-safe), branded types for Reddit IDs (`t2_${string}`, `t3_${string}`), seeded Park-Miller PRNG for deterministic game state, SAT collision detection (Separating Axis Theorem), synthesized Web Audio (no prerecorded files), `composed: true` CustomEvent bubbles through shadow DOM. Redis layer: 378 lines with 12 key namespaces (player, post, match, leaderboard, etc.), composite keys `t3_t2`, no transactions yet. Scheduler for recurring match creation. (Source: `reddit/devvit-fiddlesticks`. Blocks-era, needs migration before June 30, 2026.)
 
+### [context-mod-devvit](https://github.com/StephenSook/context-mod-devvit) — Rule-Engine Moderation Bot
+```typescript
+// 1. Hono routing — modular route files mounted on Hono app (src/index.ts)
+import { Hono } from 'hono';
+import { serve } from '@hono/node-server';
+import { createServer, getServerPort } from '@devvit/web/server';
+import { api } from './routes/api';
+import { triggers } from './routes/triggers';
+import { scheduler } from './routes/scheduler';
+
+const app = new Hono();
+const internal = new Hono();
+internal.route('/triggers', triggers);
+internal.route('/cron', scheduler);
+app.route('/api', api);
+app.route('/internal', internal);
+serve({ fetch: app.fetch, createServer, port: getServerPort() });
+
+// 2. 3-tier idempotency — prevents double-fire on Devvit's at-least-once delivery
+// Tier 1: firstSeen — 24h NX guard per thingId (fail-CLOSED on Redis error)
+const result = await redis.set(`cm:proc:${thingId}`, '1', { nx: true, expiration: ... });
+if (result !== 'OK') return; // already processed
+
+// Tier 2: reserveAction — 5min NX lock + crypto.randomUUID() token
+const token = `${Date.now()}-${crypto.randomUUID()}`;
+const reserved = await redis.set(`cm:action:pending:${hash}`, token, { nx: true, expiration: ... });
+// Check done marker inside lock window
+const done = await redis.get(`cm:action:done:${hash}`);
+if (done) { /* release pending, skip */ }
+
+// Tier 3: commitAction — 7d done marker, compare-and-delete pending
+await redis.set(`cm:action:done:${hash}`, '1', { expiration: 7 * 86400_000 });
+const current = await redis.get(pendingKey);
+if (current === token) await redis.del(pendingKey); // only delete if we own it
+
+// 3. Circuit breaker — 3-state machine (CLOSED → OPEN → HALF_OPEN)
+// 5 failures → OPEN for 60s → HALF_OPEN allows 1 probe → success → CLOSED
+// Fails OPEN on Redis blip (better to let API calls through)
+const cb = await checkCircuit(`openai:${sub}`);
+if (cb.state === 'open') return 503; // retry in cb.retryInSec
+// On success: await recordSuccess(bucket)
+// On transient failure: await recordFailure(bucket) — only on 5xx/timeout, NOT 401
+
+// 4. Rate limiting — fixed-window Redis counter (no Lua needed)
+const rl = await checkRateLimit('explain', sub, 30, 3600); // 30/hr per sub
+if (!rl.allowed) return 429;
+// Per-user tighter cap: 10/hr on top of per-sub
+const rlUser = await checkRateLimit('explain', `${sub}:${username}`, 10, 3600);
+
+// 5. Mod-auth gating — defense-in-depth beyond Devvit's forUserType
+// Custom posts are HTTP-reachable by ANY viewer, not just the mod who clicked
+export async function requireModerator(): Promise<ModAuthResult> {
+  const sub = (await reddit.getCurrentSubreddit()).name;
+  const user = await reddit.getCurrentUser();
+  const mods = await reddit.getModerators({ subredditName: sub }).all();
+  const isMod = mods.some((m) => m.username === user.username);
+  if (!isMod) return { ok: false, status: 403, error: 'not a moderator' };
+  return { ok: true, sub, username: user.username };
+}
+// Classify transient errors → 503 (retry), programming errors → 500
+
+// 6. Wiki config publish — immutable revisions + atomic pointer
+// Mod edits wiki → cron parses JSON5 → validates with AJV → writes cfg:rev:{n} → bumps cfg:current_rev
+// Every handleActivity reads the pointer ONCE at event start (read-once snapshot)
+// Invalid config → pointer NOT bumped → sub keeps running last good config
+```
+Key patterns: Hono modular routing (not Express), 3-tier idempotency (firstSeen NX → reserveAction 5min lock → commitAction 7d done marker), circuit breaker (CLOSED→OPEN→HALF_OPEN, fails open on Redis errors), fixed-window rate limiting (per-sub + per-user), `requireModerator()` defense-in-depth for HTTP-reachable custom posts, wiki config publish with immutable revisions and atomic pointer (read-once snapshot, invalid config doesn't bump pointer). Devvit Web, JSON5 rules, 8 rule kinds, 8 action handlers, perceptual-blockhash image-repost, AI explain-event, Observatory dashboard. Hackathon 2026 entry. (Source: `StephenSook/context-mod-devvit`. Verified from source code.)
+
 **Official Devvit App Patterns (reddit/devvit monorepo apps):**
 The `reddit/devvit` monorepo contains reference apps under `packages/apps/`:
 | App | Pattern |

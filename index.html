@@ -349,6 +349,10 @@ function unlock(key) { delete locks[key]; }</code></pre>
     <tr><td>Unwrap <code>select</code> settings: <code>Array.isArray(v) ? v[0] : v</code></td><td>Call <code>.startsWith()</code> on the result — it's an array, not a string</td></tr>
     <tr><td>Use <code>sendPrivateMessage({ to: "/r/sub" })</code> for modmail</td><td>Use <code>sendPrivateMessage({ to: "username" })</code> — individual DMs fail in Devvit Web</td></tr>
     <tr><td>Use <code>position: absolute</code> for full-viewport cards on iOS</td><td>Use <code>height: 100%</code> inside flex — iOS Safari resolves as <code>auto</code></td></tr>
+    <tr>
+      <td><strong>Custom posts are HTTP-reachable by ANY viewer</strong></td>
+      <td><code>permissions.reddit.scope: "moderator"</code> is a request-token scope for what the app may call, NOT a viewer gate. Custom posts serve to anyone who can see the parent post. Always add <code>requireModerator()</code> at the handler level.</td>
+    </tr>
   </table>
 
   <div class="warn-box" style="margin-top:16px;">
@@ -493,6 +497,14 @@ function unlock(key) { delete locks[key]; }</code></pre>
     <div class="warn-title">> FIDDLESTICKS</div>
     <p>A golf game using <strong>lit-html + Custom Elements</strong> instead of React. Built with esbuild-only (no webpack/vite), uses Constructable Stylesheets for CSS, seeded Park-Miller PRNG for deterministic boards, and SAT collision detection. <strong>Pattern to steal:</strong> lit-html is a lighter alternative to React for game webviews — smaller bundle, no JSX, no virtual DOM. The entire Devvit surface is only 672 lines.</p>
     <p><a href="https://github.com/reddit/devvit-fiddlesticks" target="_blank">github.com/reddit/devvit-fiddlesticks</a></p>
+  </div>
+
+  <div class="spotlight-entry" id="spotlight-cm">
+    <div class="spotlight-tag">🔧 Moderator Tool</div>
+    <div class="spotlight-title">context-mod-devvit</div>
+    <div class="spotlight-desc">
+      Devvit Web port of FoxxMD's ContextMod rule-engine moderation bot. JSON5 rules in your sub's wiki, 8 rule kinds (regex, author, history, attribution, recentActivity, repost, imageRepost, ruleSet), 8 action handlers (remove/approve/lock/comment/report/ban/userFlair/distinguish), perceptual-blockhash image-repost detection, AI rule explainer with 7-gate defense chain (auth → validate → circuit breaker → per-sub rate limit → per-user rate limit → cache → OpenAI), dry-run rule tester, Observatory dashboard with live telemetry. Hono routing, 3-tier idempotency (firstSeen/reserveAction/commitAction), FNV-1a64 hashing, wiki config publish with immutable revisions + atomic pointer bump. 828 tests, CI green across 8 jobs. Hackathon 2026 entry.
+    </div>
   </div>
 </div>
 </div>
