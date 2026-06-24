@@ -1287,6 +1287,92 @@ for (const m of milestones) {
 }
 ```
 
+## REPO PATTERNS (Verified From Source)
+
+### [devvit-state](https://github.com/foreverest/devvit-state) — Atomic Versioned State Sync Library
+```typescript
+// LIBRARY: reusable state management for Devvit apps
+// Install: npm install devvit-state zod
+// Requires: @devvit/web >=0.12.0-0 <0.13.0, Zod ^4.0.0, Node 22+
+// Enable realtime in devvit.json: "permissions": { "realtime": true }
+
+import { createDevvitState } from "devvit-state/server";
+import { z } from "zod";
+
+const roomSchema = z.object({
+  title: z.string(),
+  users: z.array(z.string()),
+});
+
+// Server: create atomic state with Redis transactions
+const roomState = await createDevvitState({
+  key: `room:${postId}`,
+  schema: roomSchema,
+  defaultValue: () => ({ title: "Lobby", users: [] }),
+  maxUpdates: 1000,       // bounded update log
+  maxUpdateFetchLimit: 500,
+});
+
+// Read current snapshot
+const current = await roomState.getCurrent();
+// { version: 3, state: { title: "Lobby", users: ["alice"] }, updatedAtMs: ... }
+
+// Atomic mutation — producer may retry on Redis transaction conflict
+const update = await roomState.mutate((draft) => {
+  draft.users.push(userId);
+});
+// Returns: { stateKey, version, patches: [{ op, path, value }], createdAtMs }
+
+// Replay missed updates
+const { updates, hasMore } = await roomState.getUpdatesSince({
+  sinceVersion: current.version,
+});
+
+// Client: subscribe to Realtime updates
+import { createDevvitStateClient } from "devvit-state/client";
+const client = createDevvitStateClient({
+  key: `room:${postId}`,
+  schema: roomSchema,
+  fetchSnapshot: async () => await trpc.roomState.current.query(),
+  fetchUpdatesSince: async (input) => await trpc.roomState.updatesSince.query(input),
+});
+const subscription = await client.subscribe({
+  onSnapshot({ snapshot }) { render(snapshot.state); },
+  onUpdate({ update, state }) { /* apply patches */ },
+  onError(error) { /* fall back to full snapshot */ },
+});
+
+// Storage keys: devvit-state:{key}:version, devvit-state:{key}:snapshot, devvit-state:{key}:updates
+// Uses Redis WATCH/MULTI/EXEC for optimistic concurrency (up to 5 retries)
+// JSON Patch diffs (op: add/remove/replace) — not full snapshots
+// Realtime is fast path only — clients recover via getUpdatesSince
+```
+
+### [shadow-mod](https://github.com/earlgreylabs/shadow-mod) — Structured Mod Training (Blind Review)
+```typescript
+// Mod training tool: Ob records decisions, Reviewer assesses independently,
+// Comparison report delivered after real mod action lands.
+// Devvit 0.13.0, Hono, Zod, pnpm, Vitest
+import { Hono } from 'hono';
+import { serve } from '@hono/node-server';
+import { createServer, getServerPort } from '@devvit/web/server';
+
+const app = new Hono();
+const internal = new Hono();
+internal.route('/menu', menu);
+internal.route('/form', forms);
+internal.route('/triggers', triggers);
+internal.route('/cron', cron);
+app.route('/internal', internal);
+serve({ fetch: app.fetch, createServer, port: getServerPort() });
+
+// Pattern: Ob/Reviewer/Comparison blind review workflow
+// 1. Ob sees post → records decision (no execute)
+// 2. Reviewer sees same post → records independent decision
+// 3. Real mod action lands → Comparison report delivered
+// Uses Zod for input validation on all routes
+```
+
 **Official Devvit App Patterns (reddit/devvit monorepo apps):**
 The `reddit/devvit` monorepo contains reference apps under `packages/apps/`:
 | App | Pattern |

@@ -514,6 +514,22 @@ function unlock(key) { delete locks[key]; }</code></pre>
       Swiss-army-knife AI mod tool for Devvit. AI rule enforcement with violation detection, TLDR summaries for long posts/comments, discussion summaries at comment milestones (20/50/100), AI summons response, conversational replies with cooldown+daily-limit, flair system with milestone tiers + AI specialist role classification, troll alerts via modmail with local score analysis. Dual LLM support (Google Gemini + OpenAI), safe mode on by default with audit logging, esbuild bundling (no Vite), settings validation endpoints for API keys.
     </div>
   </div>
+
+  <div class="spotlight-entry" id="spotlight-devvit-state">
+    <div class="spotlight-tag">📦 Library</div>
+    <div class="spotlight-title">devvit-state</div>
+    <div class="spotlight-desc">
+      Atomic, versioned state sync library for Devvit apps. Zod-typed JSON state with Redis WATCH/MULTI/EXEC transactions, strict versioning, JSON Patch diffs (not full snapshots), bounded update replay, and Devvit Realtime broadcasts. Optimistic concurrency with up to 5 retries on transaction conflict. Client subscribes to Realtime fast path, recovers missed updates via getUpdatesSince, falls back to full snapshot. Reusable across any Devvit Web app.
+    </div>
+  </div>
+
+  <div class="spotlight-entry" id="spotlight-shadow-mod">
+    <div class="spotlight-tag">🎓 Mod Training</div>
+    <div class="spotlight-title">shadow-mod</div>
+    <div class="spotlight-desc">
+      Structured mod training via blind review. Observers record decisions without executing them, Reviewers assess the same posts independently, and a Comparison report lands after the real mod action — with reasoning from both. Uses Devvit 0.13.0, Hono, Zod validation, pnpm, Vitest. Designed for training new moderators without risk.
+    </div>
+  </div>
 </div>
 </div>
 
