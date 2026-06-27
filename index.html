@@ -25,6 +25,7 @@
     <li><a href="#spotlight"><span class="nav-num">07</span>Community Spotlight</a></li>
     <li><a href="#migration"><span class="nav-num">08</span>Blocks Migration</a></li>
     <li><a href="#next"><span class="nav-num">09</span>What's Next</a></li>
+    <li><a href="#production"><span class="nav-num">10</span>Going to Production</a></li>
   </ul>
   <div class="sidebar-footer">from 40+ community repos</div>
 </nav>
@@ -587,10 +588,100 @@ function unlock(key) { delete locks[key]; }</code></pre>
 
   <p><strong>5. Publish and earn.</strong> When your app is ready, <code>npx devvit publish</code> submits it for review. Once approved, mods can install it. If it gets engagement, you might qualify for the <strong>Reddit Developer Fund</strong> (up to $167k per app).</p>
 
+  <p><strong>6. Go through the production checklist.</strong> Before you publish, run through the <a href="#production">Going to Production</a> checklist — it covers every gotcha, security check, and common issue that trips up first-time releases.</p>
+
   <div class="note-box" style="margin-top:20px;">
     <div class="note-title">> REMEMBER</div>
     <p>Every advanced Devvit developer started exactly where you are now. The only difference is they shipped. So ship something. Even if it's tiny. Even if it's ugly. <strong>Put code on Reddit and see what happens.</strong></p>
   </div>
+</div>
+
+<div class="section" id="production">
+  <div class="section-header">
+    <span class="section-num">10</span>
+    <h3>Going to Production</h3>
+  </div>
+  <p>Building is half the battle. Here's the checklist to go from <code>npm run dev</code> to a live app on Reddit.</p>
+
+  <div class="gotcha-box">
+    <div class="gotcha-title">! PRE-UPLOAD CHECKLIST</div>
+    <p><strong>Code Quality:</strong></p>
+    <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
+      <li>No <code>console.log</code> in client code (doesn't surface in Devvit Web anyway)</li>
+      <li>Server logs use structured prefixes: <code>[FEATURE] action | key=value</code></li>
+      <li>No hardcoded secrets — use <code>context.settings.get()</code> for all config</li>
+      <li>No empty string Redis keys (reject with 401 if <code>context.username</code> is empty)</li>
+    </ul>
+    <p><strong>Security:</strong></p>
+    <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
+      <li>PII cleanup on leave/delete (Redis doesn't auto-expire)</li>
+      <li>CSV export has formula injection prevention</li>
+      <li>Mod-only features gated with <code>requireModerator()</code></li>
+      <li>No email/phone in public views — Mod Dashboard only</li>
+    </ul>
+    <p><strong>Devvit Web:</strong></p>
+    <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
+      <li>Using <code>@devvit/web</code> (NOT <code>@devvit/public-api</code> — Blocks removed v0.13)</li>
+      <li>All SDK calls use <code>await</code> (including <code>getCurrentUser</code>)</li>
+      <li><code>createAsync</code> called in user action handlers, NOT on mount</li>
+      <li>Forms use <code>showForm()</code> from <code>@devvit/web/client</code></li>
+      <li>No browser <code>confirm()</code> / <code>alert()</code> (blocked by CSP)</li>
+    </ul>
+    <p><strong>Redis:</strong></p>
+    <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
+      <li>No <code>incr</code> inside MULTI/EXEC (silently fails)</li>
+      <li>Large hashes use <code>hScan</code> (not <code>hGetAll</code> — ~128 field limit)</li>
+      <li>TTL set on all ephemeral data</li>
+      <li>Race conditions handled with WATCH→MULTI→EXEC retry loop</li>
+    </ul>
+    <p><strong>UI/UX:</strong></p>
+    <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
+      <li>Full-viewport uses <code>position: absolute</code> (NOT <code>height:100%</code>)</li>
+      <li><code>requestExpandedMode()</code> called before <code>navigateTo()</code></li>
+      <li>Event delegation: single <code>data-action</code> attribute + one body listener</li>
+      <li>No mixing direct listeners with delegation (causes double-fires)</li>
+    </ul>
+    <p><strong>Testing:</strong></p>
+    <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
+      <li>Tested on mobile AND web (inline webview differs)</li>
+      <li>Tested with mod AND non-mod accounts</li>
+      <li>Tested with empty states (fresh install)</li>
+      <li>Tested with rapid clicks (pagination, forms)</li>
+    </ul>
+  </div>
+
+  <p style="margin-top: 20px;"><strong>Upload & Publish:</strong></p>
+  <div class="step-list">
+    <div class="step"><span class="step-num">1</span> Upload (private): <code>npx devvit upload --bump patch</code></div>
+    <div class="step"><span class="step-num">2</span> Test on dev subreddit: <code>npx devvit logs r/your_test_sub</code></div>
+    <div class="step"><span class="step-num">3</span> Submit for review: <code>npx devvit publish --bump minor</code></div>
+    <div class="step"><span class="step-num">4</span> After approval — install: <code>npx devvit install r/target_sub</code></div>
+  </div>
+
+  <div class="gotcha-box" style="margin-top: 20px;">
+    <div class="gotcha-title">! CRITICAL: CLICK "UPDATE" AFTER EVERY UPLOAD</div>
+    <p>Upload does NOT auto-update installed subreddits. After every upload, go to <strong>developers.reddit.com/apps/your-app</strong> and click the blue <strong>"Update"</strong> button under "My Installations." Skip this and your test subreddit runs old code.</p>
+  </div>
+
+  <p style="margin-top: 20px;"><strong>Common Production Issues:</strong></p>
+  <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-size: 14px;">
+    <thead>
+      <tr style="border-bottom: 2px solid var(--accent); text-align: left;">
+        <th style="padding: 8px 12px; color: var(--accent);">Symptom</th>
+        <th style="padding: 8px 12px; color: var(--accent);">Fix</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid var(--bg3);"><td style="padding: 8px 12px; color: var(--accent2);">App shows old code after upload</td><td style="padding: 8px 12px;">Click "Update" on developers.reddit.com</td></tr>
+      <tr style="border-bottom: 1px solid var(--bg3);"><td style="padding: 8px 12px; color: var(--accent2);">console.log not showing</td><td style="padding: 8px 12px;">Use <code>devvit-cli logs</code> or custom debug panel</td></tr>
+      <tr style="border-bottom: 1px solid var(--bg3);"><td style="padding: 8px 12px; color: var(--accent2);">Settings return empty string</td><td style="padding: 8px 12px;">Use <code>reddit.settings.get()</code> (not <code>settings.value</code>)</td></tr>
+      <tr style="border-bottom: 1px solid var(--bg3);"><td style="padding: 8px 12px; color: var(--accent2);">scheduler.runJob() never fires</td><td style="padding: 8px 12px;">Switch to CRON-based scheduler</td></tr>
+      <tr style="border-bottom: 1px solid var(--bg3);"><td style="padding: 8px 12px; color: var(--accent2);">Height resets after navigateTo</td><td style="padding: 8px 12px;">Use <code>position: absolute</code> (not <code>height:100%</code>)</td></tr>
+      <tr style="border-bottom: 1px solid var(--bg3);"><td style="padding: 8px 12px; color: var(--accent2);">incr returns null in transaction</td><td style="padding: 8px 12px;">Use separate <code>incr</code> call outside MULTI/EXEC</td></tr>
+      <tr style="border-bottom: 1px solid var(--bg3);"><td style="padding: 8px 12px; color: var(--accent2);">Blank screen after Back on iOS</td><td style="padding: 8px 12px;">Add <code>visibilitychange</code> listener to re-render</td></tr>
+      <tr><td style="padding: 8px 12px; color: var(--accent2);">Double-fires on click</td><td style="padding: 8px 12px;">Use ONLY <code>data-action</code> delegation, no direct listeners</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- FOOTER -->

@@ -2333,6 +2333,112 @@ case "next":
 
 **`requestExpandedMode()` is incompatible with overlay DOM architectures.** Games and chat apps use it because they render one canvas/view. Apps with 6+ overlays (details, forms, mod dashboard) will break because DOM elements are destroyed when inline HTML is replaced.
 
+#### Additional Production Patterns (Meetit Deep Analysis)
+
+**Optimistic UI with Dirty Flag Pattern** — Track dirty state with a flag, use queue-based rendering, force re-render on return from navigation. Pattern: set `dirty=true` on data change, check flag before render, clear after render.
+
+**Devvit Settings API — Blocks vs Devvit Web** — `settings.value` returns empty string in Blocks version; must use `reddit.settings.get()` in Devvit 0.12+. Settings values persist across app version updates.
+
+**`@devvit/public-api` vs `@devvit/web/server`** — Different APIs: Blocks uses `createServer()`, Devvit Web uses `app.listen()`. Settings access differs between the two.
+
+**ES Modules Import Gotcha** — When `"type": "module"` in package.json, must use `.js` extension in relative imports (e.g., `import { foo } from './bar.js'`), NOT `.ts`.
+
+**Redis `incrementAndGet` Race Condition** — `incrementAndGet` is atomic but read-after-write is NOT guaranteed in the same transaction. Use separate calls if you need the incremented value immediately.
+
+**`hGetAll` Field Limit** — `entries()` can exceed Redis hash field limit (~128 fields). Break into `hScan` with COUNT parameter for large hashes.
+
+**Redis Transaction Gotchas** — `incr` inside MULTI/EXEC silently fails (returns null). Must use separate `incr` calls outside transactions. Use WATCH→MULTI→EXEC retry loop for optimistic locking:
+```typescript
+while (true) {
+  await redis.watch(key);
+  const val = await redis.get(key);
+  await redis.multi();
+  await redis.set(key, newVal);
+  const result = await redis.exec();
+  if (result !== null) break; // Success
+  // Otherwise retry
+}
+```
+
+**Inline Webview Height — `requestExpandedMode()`** — Use `requestExpandedMode()` to set height programmatically. CSS `height:100%` doesn't work reliably in inline context.
+
+**CSS `position:absolute` for Full-Viewport Cards** — Use `position: absolute; top:0; left:0; right:0; bottom:0` instead of `height:100%` for full-viewport cards in inline webview.
+
+**Inline Webview Height Reset** — If not using `position:absolute`, height resets to ~220px after `navigateTo()`. Always use absolute positioning for full-height views.
+
+**Vitest mockRedis** — Use `@devvit/test` mockRedis for testing, NOT vitest `vi.mock`. The Devvit test utilities handle Redis mocking correctly.
+
+**TDD Workflow** — Write failing test → implement → refactor → commit. Works well with Devvit apps when testing Redis logic.
+
+**Mod Queue Polling — `getModQueue` Doesn't Sort** — `getModQueue` returns items unsorted. Must sort by `created` DESC client-side for chronological display.
+
+**`getNewModQueue` Returns ALL Unprocessed** — Returns ALL unprocessed modmail, not just new items. Use date threshold or processed marker in Redis to filter.
+
+**ModQueueMonitor Pattern** — Track processed timestamps in Redis hash, report new/old counts, configurable cooldown prevents spam. Example:
+```typescript
+// Redis hash: modqueue:processed:{subreddit} → { itemId: timestamp }
+// On each poll:
+const processed = await redis.hGetAll(`modqueue:processed:${subreddit}`);
+const newItems = queue.filter(i => !processed[i.id]);
+const oldItems = queue.filter(i => processed[i.id]);
+```
+
+**Dev Subreddit Setup** — One `dev.subreddit` in devvit.json; all team members use same sub; mod-only install for testing.
+
+**`scheduler.runJob()` Doesn't Fire in Inline** — Use CRON instead. One-shot jobs never execute in Devvit Web inline context.
+
+**Inline `navigateTo` — Must Use `requestExpandedMode` First** — To set height before navigation, call `requestExpandedMode()` first.
+
+**`createComment` in Blocks vs Devvit** — Blocks: `ctx.ui.createComment(parentId, text)`. Devvit Web: `reddit.submitComment({id, text})`. Different APIs entirely.
+
+**Test Mocking Pattern for Devvit** — `vi.mock("@devvit/public-api")` with per-test factory overrides:
+```typescript
+vi.mock("@devvit/public-api", () => ({
+  reddit: { getPostById: vi.fn() },
+  redis: { get: vi.fn(), set: vi.fn() },
+}));
+```
+
+**`createAsync` — Must Call in User Action** — `createAsync` runs async tasks on server; must call `onLoad` inside a user action (click handler), NOT on component mount.
+
+**`reddit.distinguish` Returns Undefined** — Distinguish comment returns `undefined`. Must use `getCommentById` after distinguish to get the actual distinguished comment value.
+
+**`api.async.getModQueue` Returns `unknown`** — Must cast with `as ModQueueItem[]` or similar type assertion.
+
+**Inline Webview `postMessage`** — `window.parent.postMessage` is the ONLY way to communicate with blocks host from inline webview. No other bridge exists.
+
+**`removePost` API Limitation** — Can't get modname directly from `removePost`. Must use `getSubredditName` first, then `removePost`.
+
+**Devvit Upload Saves as Blocks Version** — Upload saves as Blocks version; publish button available for Devvit 0.12+ apps. Must explicitly switch to Devvit Web.
+
+**`getNewModQueue` Returns `any`** — Must cast to proper type (e.g., `as ModQueueItem[]`).
+
+**Redis Increment Race Condition** — `incrementAndGet` is atomic but subsequent reads in same transaction may not see the new value. Use separate calls.
+
+**ModQueueMonitor Cooldown** — Use cooldown timer to prevent spam when queue is empty. Track last poll time in Redis with TTL.
+
+**Inline Height — `position:absolute` vs `height:100%`** — `position:absolute` with top/left/right/bottom:0 is the ONLY reliable way to get full-viewport height in inline webview.
+
+**CRON Data Flow Pattern** — CRON reads data written by blocks UI via Redis. Redis is the bridge between the two execution contexts.
+
+**Settings Persistence Across Versions** — When you upload a new version of your app, settings values are preserved. Don't re-prompt users for settings after version updates.
+
+**Devvit Blocks Version Must Use `await`** — All Devvit SDK calls (including `getCurrentUser`) must use `await` in Blocks version.
+
+**`createAsync` in User Action** — Must call `onLoad` inside a user action handler, not on component mount. Component mount runs before Devvit SDK is ready.
+
+**Inline Webview — No Console.log** — `console.log` does NOT surface in Devvit Web inline webview. Use custom debug panel or server-side `devvit logs`.
+
+**Event Delegation — Don't Mix with Direct Listeners** — Never add direct `addEventListener` on elements that also use `data-action` delegation. Mixing causes silent double-fires.
+
+**Per-Instance Pagination Lock** — For rapid-click pagination, use item-ID-keyed locks with setTimeout unlock to prevent race conditions.
+
+**Safe Code Deletion** — Don't delete server code near helper functions without checking dependencies. One edit, one build, one test.
+
+**Dead Code Calling Broken APIs** — Dead code that calls broken APIs is a trap. Either remove it or make it a no-op with clear log message.
+
+**`requestExpandedMode()` Incompatible with Overlay DOM** — Games/chat apps work because they render one canvas. Apps with 6+ overlays break because DOM elements are destroyed when inline HTML is replaced.
+
 ---
 
 ## 13. Client-Side UI Patterns (Devvit Web)
@@ -2575,6 +2681,124 @@ npx devvit install r/sub --version 1.0.0  # Specific version
 Publishing a new version does NOT auto-update installed subreddits. Each must update via:
 - CLI: `npx devvit install r/subreddit`
 - Web: developers.reddit.com/apps > Installed in communities > blue "Update" button
+
+### Going to Production Checklist
+
+#### Pre-Upload Checklist
+
+1. **Code Quality**
+   - [ ] All `console.log` removed from client code (they don't surface in Devvit Web inline webview anyway)
+   - [ ] Server-side logs use structured prefixes: `[FEATURE] action detail | key=value`
+   - [ ] No hardcoded secrets or API keys (use `context.settings.get()` for all sensitive config)
+   - [ ] No empty string Redis member keys (reject with 401 if `context.username` is empty)
+   - [ ] All Redis writes validate entity existence first (never assume client sends valid IDs)
+
+2. **Security**
+   - [ ] PII cleanup on leave/delete events (Redis doesn't auto-expire or cascade-delete)
+   - [ ] CSV export has formula injection prevention (prefix `=`, `+`, `-`, `@`, `\t`, `\r` with single quote)
+   - [ ] Mod-only features gated with `requireModerator()` or equivalent check
+   - [ ] No sensitive data (email, phone) exposed in public views — only in Mod Dashboard
+   - [ ] Input validation on all API endpoints (sanitize before Redis writes)
+
+3. **Devvit Web Specific**
+   - [ ] Using `@devvit/web` (NOT `@devvit/public-api` — Blocks removed in v0.13.0)
+   - [ ] All Devvit SDK calls use `await` (including `getCurrentUser`)
+   - [ ] `createAsync` / `onLoad` called inside user action handlers, NOT on component mount
+   - [ ] No `window.parent.postMessage` for client-server communication (use `fetch('/api/...')`)
+   - [ ] Forms use `showForm()` from `@devvit/web/client`, not custom HTML forms
+   - [ ] No external images in inline webview (bundle assets or use `media.upload()`)
+   - [ ] No browser `confirm()` / `alert()` (blocked by CSP — use in-app UI)
+
+4. **Redis**
+   - [ ] No `incr` inside MULTI/EXEC transactions (silently fails — use separate calls)
+   - [ ] Large hashes use `hScan` with COUNT (not `hGetAll` which can exceed ~128 field limit)
+   - [ ] All Redis keys use proper namespacing: `{feature}:{entity}:{id}`
+   - [ ] TTL set on all ephemeral data (dedup keys, session data, rate limit counters)
+   - [ ] Race conditions handled (WATCH→MULTI→EXEC retry loop for optimistic locking)
+
+5. **UI/UX**
+   - [ ] Full-viewport cards use `position: absolute; top:0; left:0; right:0; bottom:0` (NOT `height:100%`)
+   - [ ] `requestExpandedMode()` called before `navigateTo()` to set height
+   - [ ] Event delegation uses single `data-action` attribute + one `document.body` listener
+   - [ ] No mixing of direct `addEventListener` with `data-action` delegation (causes double-fires)
+   - [ ] Pagination uses per-instance locks to prevent rapid-click race conditions
+   - [ ] Loading states shown during async operations
+   - [ ] Error states handled gracefully (not blank screens)
+
+6. **Testing**
+   - [ ] Tested on mobile AND web (inline webview behaves differently)
+   - [ ] Tested with multiple accounts (mod + non-mod)
+   - [ ] Tested with empty states (no events, no posts, fresh install)
+   - [ ] Tested with rapid clicks (pagination, form submission)
+   - [ ] Server logs verified via `devvit-cli logs r/your_subreddit`
+
+#### Upload & Publish Steps
+
+```powershell
+# Step 1: Upload (private — only you can see)
+npx devvit upload --bump patch          # v0.0.1 → v0.0.2
+
+# Step 2: Test on your dev subreddit
+npx devvit logs r/your_test_sub         # Watch logs while testing
+
+# Step 3: Submit for review
+npx devvit publish --bump minor         # v0.0.2 → v0.1.0
+
+# Step 4: After approval — install on target subreddits
+npx devvit install r/target_sub
+```
+
+#### Post-Upload Critical Step
+
+**After EVERY upload, go to https://developers.reddit.com/apps/your-app and click the blue "Update" button under "My Installations."** Upload does NOT auto-update installed subreddits. If you skip this, your test subreddit runs old code.
+
+#### Review Process
+
+| Factor | Impact on Review Time |
+|--------|----------------------|
+| Standard mod tool | 1-2 business days |
+| Uses `runAs: 'APP'` | Standard review |
+| Uses `runAs: 'USER'` | Longer review (permission scope) |
+| External API fetch | Must document fetch domains in README |
+| Payments / monetization | Extended review |
+| Clear, accurate README | Faster review |
+| Mobile + web tested | Faster review |
+
+#### README Requirements for Review
+- Accurate description of what the app does
+- List of required permissions and why
+- Any external API domains (if using `fetch()`)
+- How to configure settings (if applicable)
+- Contact info for support
+
+#### Version Management
+- `--bump patch` for bug fixes (0.0.1 → 0.0.2)
+- `--bump minor` for new features (0.0.1 → 0.1.0)
+- `--bump major` for breaking changes (0.1.0 → 1.0.0)
+- Settings values persist across version updates (don't re-prompt users)
+- `--public` flag makes app visible in App Directory
+
+#### Post-Launch Monitoring
+- `npx devvit logs r/subreddit` — check server-side logs
+- Monitor Redis usage (keys, memory)
+- Check for errors in trigger handlers
+- Verify CRON jobs are firing on schedule
+- Watch for rate limiting on external API calls
+
+#### Common Production Issues & Fixes
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| App shows old code after upload | Didn't click "Update" on portal | Go to developers.reddit.com → click blue "Update" button |
+| `console.log` not showing | Devvit Web inline webview doesn't surface it | Use server logs (`devvit-cli logs`) or custom debug panel |
+| Settings return empty string | Using `settings.value` in Blocks version | Use `reddit.settings.get()` in Devvit 0.12+ |
+| `scheduler.runJob()` never fires | One-shot jobs don't work in inline context | Switch to CRON-based scheduler |
+| Height resets after navigateTo | CSS `height:100%` doesn't work in inline | Use `position: absolute; top:0; left:0; right:0; bottom:0` |
+| `incr` returns null in transaction | `incr` inside MULTI/EXEC silently fails | Use separate `incr` call outside transaction |
+| `getModQueue` unsorted | API returns items in arbitrary order | Sort by `created` DESC client-side |
+| `reddit.distinguish` returns undefined | API doesn't return the distinguished value | Call `getCommentById` after distinguish |
+| Blank screen after Back on iOS | navigateTo + Back loses state | Add `visibilitychange` listener to re-render |
+| Double-fires on click | Mixing data-action delegation with direct listeners | Use ONLY data-action delegation, no direct addEventListener |
 
 ---
 
