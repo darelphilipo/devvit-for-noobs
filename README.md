@@ -4,6 +4,8 @@ A retro 8-bit pixel art guide to building apps on Reddit's Devvit platform. Buil
 
 > **40+ repos analyzed. Battle-tested patterns extracted. One reference to rule them all.**
 
+### [**→ Read the Guide**](https://darelphilipo.github.io/devvit-for-noobs/)
+
 ## What You'll Learn
 
 This guide takes you from zero to shipping a Devvit app on Reddit. No fluff, no jargon — just the stuff that actually works, learned from analyzing 40+ production apps.
