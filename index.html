@@ -16,16 +16,16 @@
   </div>
   <ul class="sidebar-nav">
     <li><a href="#hero" class="active"><span class="nav-num">00</span>Home</a></li>
-    <li><a href="#what"><span class="nav-num">01</span>What You Can Build</a></li>
+    <li><a href="#what"><span class="nav-num">01</span>What Can You Build</a></li>
     <li><a href="#first-app"><span class="nav-num">02</span>First App in 5 Min</a></li>
-    <li><a href="#ingredients"><span class="nav-num">03</span>Magic Ingredients</a></li>
-    <li><a href="#libraries"><span class="nav-num">04</span>Libraries to Use</a></li>
-    <li><a href="#patterns"><span class="nav-num">05</span>Real Patterns</a></li>
-    <li><a href="#gotchas"><span class="nav-num">06</span>Wish I Knew Sooner</a></li>
-    <li><a href="#spotlight"><span class="nav-num">07</span>Community Spotlight</a></li>
+    <li><a href="#stack"><span class="nav-num">03</span>The Stack</a></li>
+    <li><a href="#patterns"><span class="nav-num">04</span>Architecture Patterns</a></li>
+    <li><a href="#redis"><span class="nav-num">05</span>Redis Deep Dive</a></li>
+    <li><a href="#gotchas"><span class="nav-num">06</span>Gotchas &amp; Pitfalls</a></li>
+    <li><a href="#production"><span class="nav-num">07</span>Production Checklist</a></li>
     <li><a href="#migration"><span class="nav-num">08</span>Blocks Migration</a></li>
-    <li><a href="#next"><span class="nav-num">09</span>What's Next</a></li>
-    <li><a href="#production"><span class="nav-num">10</span>Going to Production</a></li>
+    <li><a href="#spotlight"><span class="nav-num">09</span>Community Spotlight</a></li>
+    <li><a href="#next"><span class="nav-num">10</span>Resources</a></li>
   </ul>
   <div class="sidebar-footer">from 40+ community repos</div>
 </nav>
@@ -36,47 +36,70 @@
 <!-- MAIN CONTENT -->
 <main class="main">
 
-<!-- HERO -->
+<!-- ============================================
+     SECTION 00: HOME
+     ============================================ -->
 <div class="section" id="hero">
   <div class="page-header">
     <h2>DEVVIT<br>FOR NOOBS</h2>
     <div class="tagline">Build apps that live inside Reddit. No, seriously.</div>
   </div>
-  <p>You know those interactive posts you see on Reddit? The games people play inside a thread? The mod tools that auto-remove spam? Those are <strong>Devvit apps</strong> — and you can build one too. In about 5 minutes. With zero server costs. For free.</p>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>Devvit = free hosted apps on Reddit (games, mod tools, community apps). Use <code>@devvit/web</code> (Blocks is dead June 30, 2026). Stack: React 19 + Tailwind 4 + Hono + Redis. 40+ repos analyzed &rarr; <code>skills.md</code> is your reference manual. Ship something &rarr; Reddit Developer Fund pays up to $167k.</p>
+  </div>
+
+  <p>You know those interactive posts you see on Reddit? The games people play inside a thread? The mod tools that auto-remove spam? Those are <strong>Devvit apps</strong> &mdash; and you can build one too. In about 5 minutes. With zero server costs. For free.</p>
   <p>This guide was made by someone who figured it out the hard way so you don't have to. Grab a drink, scroll down, and let's build something cool.</p>
 </div>
 
-<!-- SECTION 1: WHAT CAN YOU BUILD -->
+<!-- ============================================
+     SECTION 01: WHAT CAN YOU BUILD
+     ============================================ -->
 <div class="section" id="what">
   <div class="section-header">
     <span class="section-num">01</span>
     <h3>What Can You Build?</h3>
   </div>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>Games, mod tools, community apps &mdash; all free on Reddit's servers.</p>
+  </div>
+
   <p>Devvit gives you <strong>free hosted apps on Reddit</strong>. Your code runs on Reddit's servers. Users never leave the platform. Here's what people are actually building:</p>
 
   <div class="warn-box" style="margin-top:16px;">
-    <div class="warn-title">> GAMES</div>
-    <p><strong>Hot and Cold</strong> — a daily guessing game with 50,000+ players. <strong>Pixelary</strong> — draw something, Reddit guesses. <strong>Blokkit</strong> — a full Unity game running in a Reddit post. If you can build it for the web, you can put it on Reddit.</p>
+    <div class="warn-title">&gt; GAMES</div>
+    <p><strong>Hot and Cold</strong> &mdash; a daily guessing game with 50,000+ players. <strong>Pixelary</strong> &mdash; draw something, Reddit guesses. <strong>Blokkit</strong> &mdash; a full Unity game running in a Reddit post. If you can build it for the web, you can put it on Reddit.</p>
   </div>
 
   <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> MOD TOOLS</div>
+    <div class="note-title">&gt; MOD TOOLS</div>
     <p>Auto-remove comments that don't match flair. Detect ban evasion. Forward modmail to Discord. Build a dashboard that saves mods hours every week. <strong>Community mods install these with one click.</strong></p>
   </div>
 
   <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> COMMUNITY APPS</div>
+    <div class="warn-title">&gt; COMMUNITY APPS</div>
     <p>Event meetup managers. Community surveys. Leaderboards. Daily discussion threads. AMA schedulers. <strong>If a subreddit needs it, you can build it.</strong></p>
   </div>
 
-  <p style="margin-top:16px;">And Reddit <strong>pays developers</strong> through the Reddit Developer Fund — up to $167,000 per app based on engagement. Yeah, really.</p>
+  <p style="margin-top:16px;">And Reddit <strong>pays developers</strong> through the Reddit Developer Fund &mdash; up to $167,000 per app based on engagement. Yeah, really.</p>
 </div>
 
-<!-- SECTION 2: FIRST APP IN 5 MINUTES -->
+<!-- ============================================
+     SECTION 02: FIRST APP IN 5 MINUTES
+     ============================================ -->
 <div class="section" id="first-app">
   <div class="section-header">
     <span class="section-num">02</span>
     <h3>Your First App in 5 Minutes</h3>
+  </div>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>Install CLI &rarr; init &rarr; dev &rarr; upload &rarr; publish.</p>
   </div>
 
   <p><strong>Step 1:</strong> Install Node.js (v22+) then open your terminal:</p>
@@ -84,9 +107,9 @@
 # On Windows, the command is "devvit-cli" not "devvit"
 devvit-cli --version</code></pre>
 
-  <p><strong>Step 2:</strong> Create your app. Devvit Web is now the ONLY option — pick "React" (games/community apps) or "Bare" (mod tools/bots). Blocks is dead.</p>
+  <p><strong>Step 2:</strong> Create your app. Devvit Web is now the ONLY option &mdash; pick "React" (games/community apps) or "Bare" (mod tools/bots). Blocks is dead.</p>
 <pre><code>devvit-cli init
-# Follow the browser OAuth flow — code auto-captures</code></pre>
+# Follow the browser OAuth flow &mdash; code auto-captures</code></pre>
 
   <p><strong>Step 3:</strong> Start the dev server. Reddit auto-creates a test subreddit for you.</p>
 <pre><code>cd my-app
@@ -95,23 +118,46 @@ npm run dev</code></pre>
   <p>You'll see a URL like <code>reddit.com/r/my-app_dev/?playtest=my-app</code>. Open it. Your app is running. On Reddit. Right now.</p>
 
   <div class="note-box">
-    <div class="note-title">> THE GOLDEN RULE</div>
+    <div class="note-title">&gt; THE GOLDEN RULE</div>
     <p>Every time you upload changes, go to <strong>developers.reddit.com/apps/your-app-name</strong> and click the blue <strong>"Update"</strong> button under "My Installations." If you skip this, your test subreddit runs the old version and you'll wonder why nothing changed for 20 minutes. Ask me how I know.</p>
   </div>
 </div>
 
-
-<!-- SECTION 3: THE MAGIC INGREDIENTS -->
-<div class="section" id="ingredients">
+<!-- ============================================
+     SECTION 03: THE STACK
+     ============================================ -->
+<div class="section" id="stack">
   <div class="section-header">
     <span class="section-num">03</span>
-    <h3>The Magic Ingredients</h3>
+    <h3>The Stack</h3>
   </div>
-  <p>Every Devvit app has three superpowers. Here's what they do — no jargon, just the real stuff:</p>
 
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>React 19 + Tailwind 4 + Hono + Redis + <code>@devvit/web</code>. That's the whole stack.</p>
+  </div>
+
+  <!-- Subsection: The Big Warning -->
+  <div class="warn-box" style="border-color:var(--red);">
+    <div class="warn-title">&gt; CRITICAL: @devvit/public-api (Blocks) IS DEAD</div>
+    <p><strong><code>@devvit/public-api</code> (Blocks) was removed in v0.13.0 (May 2026). Support ends on all Reddit clients <strong>June 30, 2026</strong>.</strong> All NEW apps must use <strong><code>@devvit/web</code></strong> exclusively. Existing Blocks apps must migrate immediately.</p>
+    <p><code>@devvit/web</code> gives you HTML/CSS/JS in an iframe + Express/Hono backend + Redis + Realtime + Media uploads. It's what Reddit recommends for ALL new apps &mdash; games, mod tools, bots, everything.</p>
+    <p><em>See the <a href="#migration">Blocks Migration</a> section below for what changed and how to migrate.</em></p>
+  </div>
+
+  <!-- Subsection: Core Stack -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Core Stack (recommended)</h4>
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; MODERN WEB APP STACK</div>
+    <p><strong>React 19</strong> + <strong>Tailwind CSS 4</strong> + <strong>Hono</strong> + <strong>Framer Motion</strong> + <strong>Lucide React</strong></p>
+    <p>This is the exact stack Reddit's own Community Chats app uses. Tailwind 4 uses CSS-first config (no <code>tailwind.config.js</code> needed). Hono replaces Express &mdash; it's lighter, faster, and has better TypeScript support. Framer Motion makes everything feel alive. Lucide gives you pixel-perfect icons.</p>
+  </div>
+
+  <!-- Subsection: Redis -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Redis (your free database)</h4>
   <div class="warn-box">
-    <div class="warn-title">> REDIS — Your Database (Free!)</div>
-    <p>Redis is a lightning-fast key-value store. Think of it like a giant <code>Map&lt;String, anything&gt;</code> that survives restarts. Store scores, user data, settings, whatever. Reddit gives you Redis for free — no setup, no bills.</p>
+    <div class="warn-title">&gt; REDIS</div>
+    <p>Redis is a lightning-fast key-value store. Think of it like a giant <code>Map&lt;String, anything&gt;</code> that survives restarts. Store scores, user data, settings, whatever. Reddit gives you Redis for free &mdash; no setup, no bills.</p>
 <pre><code>import { redis } from "@devvit/web/server";
 
 // Save a score
@@ -121,17 +167,19 @@ await redis.zAdd("highscores", { member: "u/coolguy", score: 9001 });
 const top10 = await redis.zRange("highscores", 0, 9, { by: "rank" });</code></pre>
   </div>
 
+  <!-- Subsection: Triggers -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Triggers (event-driven)</h4>
   <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> TRIGGERS — When Stuff Happens</div>
+    <div class="note-title">&gt; TRIGGERS</div>
     <p>Triggers are the "when X happens, do Y" of Reddit. New comment? Trigger fires. Mod takes an action? Trigger fires. App gets installed? Trigger fires. You just write the "what to do" part.</p>
-<pre><code>// In devvit.json — declare what events you want to listen to
+<pre><code>// In devvit.json &mdash; declare what events you want to listen to
 "triggers": {
   "events": {
     "CommentSubmit": { "endpoint": "/internal/triggers/comment" }
   }
 }
 
-// In your server code — handle the event via an HTTP endpoint
+// In your server code &mdash; handle the event via an HTTP endpoint
 router.post("/internal/triggers/comment", async (req, res) => {
   const { comment } = req.body;
   console.log("Someone said: " + comment.body);
@@ -140,10 +188,12 @@ router.post("/internal/triggers/comment", async (req, res) => {
 });</code></pre>
   </div>
 
+  <!-- Subsection: Scheduler -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Scheduler (CRON only)</h4>
   <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> SCHEDULER — The Time Machine</div>
+    <div class="warn-title">&gt; SCHEDULER</div>
     <p>Need something to run every hour? Every day at 9 AM? The scheduler handles it. But here's the thing nobody tells you: <strong>CRON jobs work. One-shot jobs don't (in inline mode).</strong> Use CRON for everything.</p>
-<pre><code>// In devvit.json — this runs every 5 minutes, FOREVER
+<pre><code>// In devvit.json &mdash; this runs every 5 minutes, FOREVER
 "scheduler": {
   "tasks": {
     "check-reminders": {
@@ -153,31 +203,12 @@ router.post("/internal/triggers/comment", async (req, res) => {
   }
 }</code></pre>
   </div>
-</div>
 
-<!-- SECTION 3.5: LIBRARIES TO USE -->
-<div class="section" id="libraries">
-  <div class="section-header">
-    <span class="section-num">04</span>
-    <h3>Libraries: What Real Devs Actually Use</h3>
-  </div>
-   <p>Don't guess what to install. Here's what the most popular production apps use (extracted from 40+ repos):</p>
-
-  <div class="warn-box" style="border-color:var(--red);">
-    <div class="warn-title">> ⚠️ CRITICAL: @devvit/public-api (Blocks) IS DEAD</div>
-    <p><strong><code>@devvit/public-api</code> (Blocks) was removed in v0.13.0 (May 2026). Support ends on all Reddit clients <strong>June 30, 2026</strong>.</strong> All NEW apps must use <strong><code>@devvit/web</code></strong> exclusively. Existing Blocks apps must migrate immediately.</p>
-    <p><code>@devvit/web</code> gives you HTML/CSS/JS in an iframe + Express/Hono backend + Redis + Realtime + Media uploads. It's what Reddit recommends for ALL new apps — games, mod tools, bots, everything.</p>
-    <p><em>See the <a href="#migration">Blocks Migration</a> section below for what changed and how to migrate.</em></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> MODERN WEB APP STACK (recommended)</div>
-    <p><strong>React 19</strong> + <strong>Tailwind CSS 4</strong> + <strong>Hono</strong> + <strong>Framer Motion</strong> + <strong>Lucide React</strong></p>
-    <p>This is the exact stack Reddit's own Community Chats app uses. Tailwind 4 uses CSS-first config (no <code>tailwind.config.js</code> needed). Hono replaces Express — it's lighter, faster, and has better TypeScript support. Framer Motion makes everything feel alive. Lucide gives you pixel-perfect icons.</p>
-  </div>
-
+  <!-- Subsection: Libraries -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Libraries (what real devs actually use)</h4>
+  <p>Don't guess what to install. Here's what the most popular production apps use (extracted from 40+ repos):</p>
   <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> UNIVERSAL UTILITIES (every repo uses these)</div>
+    <div class="warn-title">&gt; UNIVERSAL UTILITIES</div>
     <table class="pixel-table" style="margin:12px 0;font-size:0.75rem;">
       <tr><th>Library</th><th>What it does</th><th>Used by</th></tr>
       <tr><td><code>date-fns</code></td><td>Date math (addSeconds, subDays, format)</td><td>Bot Bouncer, Sub Stats, AutoModMail</td></tr>
@@ -190,32 +221,54 @@ router.post("/internal/triggers/comment", async (req, res) => {
   </div>
 
   <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> GAME ENGINES</div>
+    <div class="note-title">&gt; OFFICIAL UI KIT</div>
+    <p>Reddit now maintains <strong>@devvit/kit</strong> with UI components: <code>Columns</code>, <code>ItemPagination</code>, <code>DevToolbar</code>. Install via <code>npm install @devvit/kit</code>. Also new: <strong>PixiJS 8 + React 19</strong> combo template for 2D games, and <strong>DEFCON RED</strong> scenario-based game example from the official Reddit team.</p>
+  </div>
+
+  <!-- Subsection: Game Engines -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Game Engines</h4>
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; GAME ENGINES</div>
     <p><strong>Phaser</strong> for 2D games (Pixelary uses this). <strong>Three.js</strong> for 3D. <strong>Unity WebGL</strong> for complex games (Blokkit, Avatar Arena). Each has an official Devvit starter template.</p>
   </div>
 
+  <!-- Subsection: AI Features -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">AI Features</h4>
   <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> AI / ADVANCED FEATURES</div>
+    <div class="warn-title">&gt; AI / ADVANCED FEATURES</div>
     <p>HotAndCold uses <strong>OpenAI</strong> + <strong>Google Gemini</strong> for content generation. Bot Bouncer uses <strong>redos-detector</strong> to prevent regex attacks. If you need vector search, <strong>sqlite-vec</strong> works inside Devvit.</p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> NEW: OFFICIAL UI KIT & PIXIJS TEMPLATE</div>
-    <p>Reddit now maintains <strong>@devvit/kit</strong> with UI components: <code>Columns</code>, <code>ItemPagination</code>, <code>DevToolbar</code>. Install via <code>npm install @devvit/kit</code>. Also new: <strong>PixiJS 8 + React 19</strong> combo template for 2D games, and <strong>DEFCON RED</strong> scenario-based game example from the official Reddit team.</p>
   </div>
 </div>
 
-<!-- SECTION 4: REAL PATTERNS FROM REAL DEVS -->
+<!-- ============================================
+     SECTION 04: ARCHITECTURE PATTERNS
+     ============================================ -->
 <div class="section" id="patterns">
   <div class="section-header">
-    <span class="section-num">05</span>
-    <h3>Battle-Tested Patterns from Real Devs</h3>
+    <span class="section-num">04</span>
+    <h3>Architecture Patterns</h3>
   </div>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>6 proven patterns from 40+ production apps.</p>
+  </div>
+
   <p>These patterns came from analyzing 40+ production Devvit apps. They solve the problems you'll actually hit.</p>
+
+  <table class="pixel-table" style="margin:20px 0;font-size:0.75rem;">
+    <tr><th>Pattern</th><th>When to Use</th><th>Used By</th></tr>
+    <tr><td>Hybrid Backend</td><td>Rich UI + background tasks</td><td>Meetit, Microlympics</td></tr>
+    <tr><td>Webhook Dispatcher</td><td>Multi-platform notifications</td><td>Modmail-to-Discord, Admin Tattler</td></tr>
+    <tr><td>Cache the Modlist</td><td>Frequent mod checks</td><td>Only-Flairs, Mod Mentions</td></tr>
+    <tr><td>Mobile Forms</td><td>Any form on mobile</td><td>Meetit, Community Survey</td></tr>
+    <tr><td>Real-Time Polling</td><td>Chat / live updates</td><td>Community Chats (official)</td></tr>
+    <tr><td>Event Delegation</td><td>Complex UIs with buttons</td><td>Meetit, ContextMod, every mod tool</td></tr>
+  </table>
 
   <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 1: The Hybrid Backend</h4>
   <p><em>Used by: Meetit (event manager), Microlympics</em></p>
-  <p>Your beautiful UI lives in Devvit Web (HTML/CSS/JS in an iframe). But background tasks — sending reminders, cleaning up old data, creating daily posts — run through <strong>CRON jobs</strong> that operate server-side, outside the iframe. Both share data through Redis.</p>
+  <p>Your beautiful UI lives in Devvit Web (HTML/CSS/JS in an iframe). But background tasks &mdash; sending reminders, cleaning up old data, creating daily posts &mdash; run through <strong>CRON jobs</strong> that operate server-side, outside the iframe. Both share data through Redis.</p>
 <pre><code>// Your UI handles user interactions
 app.get("/api/rsvp", async (req, res) => {
   await redis.zAdd("rsvps:event123", { member: username, score: Date.now() });
@@ -226,7 +279,7 @@ app.get("/api/rsvp", async (req, res) => {
 const now = Date.now();
 const events = await redis.hGetAll("events");
 for (const [id, data] of Object.entries(events)) {
-  if (data.reminderTime < now && !(await redis.exists("reminded:" + id))) {
+  if (data.reminderTime < now &amp;&amp; !(await redis.exists("reminded:" + id))) {
     await redis.set("reminded:" + id, "true", { expiration: 86400 });
     // Send the reminder...
   }
@@ -250,7 +303,7 @@ for (const [id, data] of Object.entries(events)) {
   <p>Calling <code>getModerators()</code> on every single comment trigger is crazy slow. Instead, cache the modlist as a comma-separated string in Redis. Invalidate the cache when mods are added/removed.</p>
 <pre><code>// On AppInstall or ModAction: cache the modlist
 const mods = await subreddit.getModerators({ pageSize: 500 }).all();
-await redis.set("mods", mods.map(m => m.username).join(","));
+await redis.set("mods", mods.map(m =&gt; m.username).join(","));
 
 // On CommentSubmit: check in O(1)
 const isMod = (await redis.get("mods")).split(",").includes(authorName);</code></pre>
@@ -274,11 +327,9 @@ const isMod = (await redis.get("mods")).split(",").includes(authorName);</code><
   &lt;/div&gt;
 &lt;/div&gt;</code></pre>
 
-</div>
-
   <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 5: Real-Time Chat with Polling</h4>
   <p><em>Used by: Community Chats (official Reddit app)</em></p>
-  <p>You don't need WebSockets for real-time chat on Reddit. The official Community Chats app uses <strong>HTTP polling every 3 seconds</strong> with sorted sets in Redis. Each message is also a real Reddit comment — so AutoModerator and other mod tools work automatically.</p>
+  <p>You don't need WebSockets for real-time chat on Reddit. The official Community Chats app uses <strong>HTTP polling every 3 seconds</strong> with sorted sets in Redis. Each message is also a real Reddit comment &mdash; so AutoModerator and other mod tools work automatically.</p>
 <pre><code>// Store messages in a sorted set (timestamp = score, capped at 200)
 await redis.zAdd("chat:" + postId, { member: JSON.stringify(msg), score: Date.now() });
 
@@ -287,7 +338,7 @@ const newMsgs = await redis.zRange("chat:" + postId, lastSync + 1, Infinity, { b
 
 // Prevent overlapping polls with a ref guard
 const pollingRef = useRef(false);
-const sync = useCallback(async () => {
+const sync = useCallback(async () =&gt; {
   if (pollingRef.current) return;  // Skip if previous still in-flight
   pollingRef.current = true;
   await fetch("/api/sync?lastSync=" + lastSync);
@@ -298,10 +349,10 @@ setInterval(sync, 3000);</code></pre>
 
   <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Pattern 6: Event Delegation (Don't Mix with Direct Listeners)</h4>
   <p><em>Used by: Meetit, ContextMod, every production mod tool</em></p>
-  <p>Use a single <code>data-action</code> attribute + one <code>document.body</code> listener. Never add direct <code>addEventListener</code> calls on the same elements — mixing causes <strong>silent double-fires</strong> that are nearly impossible to debug. For rapid-click pagination, use per-instance locks keyed by item ID.</p>
+  <p>Use a single <code>data-action</code> attribute + one <code>document.body</code> listener. Never add direct <code>addEventListener</code> calls on the same elements &mdash; mixing causes <strong>silent double-fires</strong> that are nearly impossible to debug. For rapid-click pagination, use per-instance locks keyed by item ID.</p>
 <pre><code>&lt;button data-action="approve" data-id="event_123"&gt;Approve&lt;/button&gt;
 
-// ONE listener on document.body — handles everything
+// ONE listener on document.body &mdash; handles everything
 document.body.addEventListener("click", function(e) {
   const action = e.target.getAttribute("data-action");
   const id = e.target.getAttribute("data-id");
@@ -319,37 +370,174 @@ function lock(key) { locks[key] = true; }
 function unlock(key) { delete locks[key]; }</code></pre>
 
   <div class="note-box" style="margin-top:20px;">
-    <div class="note-title">> PRODUCTION STACK (use these)</div>
-    <p>The official Reddit Community Chats app uses: <strong>React 19 + Tailwind CSS 4 + Hono + Framer Motion + Lucide Icons</strong>. This stack is proven to work on Devvit Web. Skip Express for new projects — Hono is lighter and has better TypeScript support. Use Tailwind 4 (CSS-first config, no <code>tailwind.config.js</code>). Animate everything with Framer Motion — it makes your app feel native.</p>
+    <div class="note-title">&gt; PRODUCTION STACK (use these)</div>
+    <p>The official Reddit Community Chats app uses: <strong>React 19 + Tailwind CSS 4 + Hono + Framer Motion + Lucide Icons</strong>. This stack is proven to work on Devvit Web. Skip Express for new projects &mdash; Hono is lighter and has better TypeScript support. Use Tailwind 4 (CSS-first config, no <code>tailwind.config.js</code>). Animate everything with Framer Motion &mdash; it makes your app feel native.</p>
   </div>
-
 </div>
 
+<!-- ============================================
+     SECTION 05: REDIS DEEP DIVE
+     ============================================ -->
+<div class="section" id="redis">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h3>Redis Deep Dive</h3>
+  </div>
 
-<!-- SECTION 6: STUFF I WISH I KNEW SOONER -->
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>Redis is your free database &mdash; here's how to use it right.</p>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Data Types</h4>
+  <div class="warn-box">
+    <div class="warn-title">&gt; BASIC OPERATIONS</div>
+<pre><code>import { redis } from '@devvit/web/server';
+
+// Simple key-value
+await redis.set('my-key', 'value');
+const val = await redis.get('my-key');
+await redis.set('temp-key', 'value', { expiration: addDays(new Date(), 7) });
+
+// Hashes
+await redis.hSet('users', { alice: JSON.stringify(data), bob: JSON.stringify(data) });
+const allUsers = await redis.hGetAll('users');
+const user = await redis.hGet('users', 'alice');
+await redis.hDel('users', ['alice']);
+
+// Sorted sets (leaderboards)
+await redis.zAdd('highscores', { member: 'alice', score: 100 });
+const rank = await redis.zScore('highscores', 'alice');
+const top10 = await redis.zRange('highscores', 0, 9, { by: 'rank' });
+await redis.zRem('highscores', ['alice']);
+const count = await redis.zCard('highscores');</code></pre>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Namespacing Convention</h4>
+  <div class="note-box">
+    <div class="note-title">&gt; NAMESPACING</div>
+    <p>Use <code>{feature}:{entity}:{id}</code> for all Redis keys. Examples:</p>
+    <p><code>reward:alice:post123:quality</code> &mdash; idempotent reward key</p>
+    <p><code>chat:t3_abc123</code> &mdash; chat messages for a post</p>
+    <p><code>mods</code> &mdash; cached modlist</p>
+    <p><code>cm:proc:t3_abc</code> &mdash; idempotency guard</p>
+    <p><code>ratelimit:explain:r/my_sub</code> &mdash; rate limit counter</p>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">TTL Patterns</h4>
+  <div class="warn-box">
+    <div class="warn-title">&gt; TTL IS YOUR FRIEND</div>
+    <p>Set TTL on all ephemeral data. Dedup keys, session data, rate limit counters &mdash; everything should expire.</p>
+<pre><code>// TTL-based scheduler (no cron needed)
+await redis.set(postId, JSON.stringify(settings));
+await redis.expire(postId, 86400); // Auto-deletes after 24h
+
+// Idempotent reward system (30-day TTL)
+const idemKey = `reward:${username}:${contentId}:${rewardType}`;
+if (await redis.exists(idemKey)) return; // Already rewarded
+await redis.set(idemKey, 'true', { expiration: addDays(new Date(), 30) });
+
+// Dedup key (28-day TTL)
+const dedupKey = `handled~${event.messageId}`;
+if (await redis.exists(dedupKey)) return;
+await redis.set(dedupKey, 'true', { expiration: addDays(new Date(), 28) });</code></pre>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Race Conditions (WATCH/MULTI/EXEC)</h4>
+  <div class="note-box">
+    <div class="note-title">&gt; OPTIMISTIC CONCURRENCY</div>
+    <p>Use WATCH/MULTI/EXEC for optimistic locking with retry loops:</p>
+<pre><code>// AppealDesk pattern: CAS with 5-retry bounded loop
+async function mutate(redis, key, mutator) {
+  for (let attempt = 0; attempt &lt; 5; attempt++) {
+    const tx = await redis.watch(key);
+    const current = JSON.parse(await redis.get(key) || '{}');
+    const next = mutator(current);
+    await tx.multi();
+    await tx.set(key, JSON.stringify(next));
+    const result = await tx.exec(); // null = conflict, retry
+    if (result !== null) return next;
+  }
+  throw new Error('CAS conflict after 5 retries');
+}
+
+// Distributed lock with hSetNX
+const lockAcquired = await redis.hSetNX('chat_thread_lock', postId, 'true');
+if (lockAcquired === 1) {
+  await redis.expire('chat_thread_lock', 15); // 15s TTL prevents deadlock
+  await createParentComment();
+}</code></pre>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Common Mistakes</h4>
+  <div class="gotcha-box">
+    <div class="gotcha-title">! REDIS GOTCHAS</div>
+    <p><strong>incr in MULTI/EXEC:</strong> Silently fails (returns null). Must use separate <code>incr</code> calls outside transactions.</p>
+    <p><strong>hGetAll field limit:</strong> <code>entries()</code> can exceed Redis hash field limit (~128 fields). Break into <code>hScan</code> with COUNT parameter for large hashes.</p>
+    <p><strong>hDel with single string:</strong> Silently succeeds but doesn't delete. Must wrap in array: <code>hDel(key, [field])</code>.</p>
+    <p><strong>Eventually consistent writes:</strong> Don't immediately verify writes. <code>zRem</code> may return 0 right after write but the member IS removed. Trust the write.</p>
+    <p><strong>zScore returns undefined not null:</strong> Use <code>!= null</code> (loose equality), not <code>!== null</code>.</p>
+    <p><strong>Sharded user store:</strong> Shard by first character of username to avoid large hash limits (62 shards for alphanumeric + hyphen + underscore).</p>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Advanced Patterns</h4>
+  <div class="note-box">
+    <div class="note-title">&gt; COMPRESSION WITH PAKO</div>
+<pre><code>import pako from 'pako';
+function compress(value) {
+  const compressed = `c:${Buffer.from(pako.deflate(value, { level: 9 })).toString('base64')}`;
+  return compressed.length &lt; value.length ? compressed : value;
+}</code></pre>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; SORTED SET SLIDING WINDOWS (rate limiting)</div>
+<pre><code>// RaidShield pattern: O(log N) rate limiting
+async function recordAndCountVelocity(redis, key, memberId, windowMs) {
+  const now = Date.now();
+  await redis.zAdd(key, { score: now, member: `${memberId}:${now}` });
+  await redis.zRemRangeByScore(key, 0, now - windowMs); // Prune expired
+  return await redis.zCard(key); // Active count in window
+}</code></pre>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; GLOBAL VS LOCAL REDIS</div>
+<pre><code>await context.redis.hSet(key, fields);        // Per-subreddit (install-scoped)
+await context.redis.global.hSet(key, fields); // Shared across ALL installs</code></pre>
+  </div>
+</div>
+
+<!-- ============================================
+     SECTION 06: GOTCHAS & PITFALLS
+     ============================================ -->
 <div class="section" id="gotchas">
   <div class="section-header">
     <span class="section-num">06</span>
-    <h3>Stuff I Wish I Knew Sooner</h3>
+    <h3>Gotchas &amp; Pitfalls</h3>
   </div>
-  <p>The things that will save you hours of debugging. Learn from my pain.</p>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>15 things that will save you hours of debugging.</p>
+  </div>
 
   <table class="pixel-table ref-table do">
     <tr><th style="color:var(--green);">DO THIS</th><th style="color:var(--red);">NOT THIS</th></tr>
-    <tr><td>Use <code>addEventListener</code> for all button clicks</td><td>Use <code>onclick="fn()"</code> — blocked by CSP, silently fails</td></tr>
-    <tr><td>Use CRON scheduler for ALL background tasks</td><td>Use one-shot <code>scheduler.runJob()</code> — never fires in inline mode</td></tr>
-    <tr><td>Pass key to <code>settings.get("key")</code></td><td>Call <code>settings.get()</code> without args — returns undefined</td></tr>
-    <tr><td>Check <code>!= null</code> for zScore results</td><td>Use <code>!== null</code> — zScore returns undefined, not null</td></tr>
-    <tr><td>Break forms into steps (max 2 fields each)</td><td>Build a long single form — mobile inline webviews can't scroll</td></tr>
-    <tr><td>Click "Update" on developer portal after upload</td><td>Assume upload auto-updates — it doesn't, old code keeps running</td></tr>
-    <tr><td>Cache modlist as CSV string in Redis</td><td>Call <code>getModerators()</code> on every trigger — way too slow</td></tr>
-    <tr><td>Use <code>addEventListener</code> after every innerHTML change</td><td>Assume event listeners survive <code>innerHTML = ...</code> — they don't</td></tr>
-    <tr><td>Build server as CJS, client as ESM</td><td>Use the same module format for both — Devvit requires CJS server</td></tr>
-    <tr><td>Include fallback HTML for instant rendering</td><td>Wait for API response before showing anything — users see blank screen</td></tr>
-    <tr><td>Wrap <code>hDel</code> fields in array: <code>hDel(key, [field])</code></td><td>Pass single string — silently fails, data never deleted</td></tr>
-    <tr><td>Unwrap <code>select</code> settings: <code>Array.isArray(v) ? v[0] : v</code></td><td>Call <code>.startsWith()</code> on the result — it's an array, not a string</td></tr>
-    <tr><td>Use <code>sendPrivateMessage({ to: "/r/sub" })</code> for modmail</td><td>Use <code>sendPrivateMessage({ to: "username" })</code> — individual DMs fail in Devvit Web</td></tr>
-    <tr><td>Use <code>position: absolute</code> for full-viewport cards on iOS</td><td>Use <code>height: 100%</code> inside flex — iOS Safari resolves as <code>auto</code></td></tr>
+    <tr><td>Use <code>addEventListener</code> for all button clicks</td><td>Use <code>onclick="fn()"</code> &mdash; blocked by CSP, silently fails</td></tr>
+    <tr><td>Use CRON scheduler for ALL background tasks</td><td>Use one-shot <code>scheduler.runJob()</code> &mdash; never fires in inline mode</td></tr>
+    <tr><td>Pass key to <code>settings.get("key")</code></td><td>Call <code>settings.get()</code> without args &mdash; returns undefined</td></tr>
+    <tr><td>Check <code>!= null</code> for zScore results</td><td>Use <code>!== null</code> &mdash; zScore returns undefined, not null</td></tr>
+    <tr><td>Break forms into steps (max 2 fields each)</td><td>Build a long single form &mdash; mobile inline webviews can't scroll</td></tr>
+    <tr><td>Click "Update" on developer portal after upload</td><td>Assume upload auto-updates &mdash; it doesn't, old code keeps running</td></tr>
+    <tr><td>Cache modlist as CSV string in Redis</td><td>Call <code>getModerators()</code> on every trigger &mdash; way too slow</td></tr>
+    <tr><td>Use <code>addEventListener</code> after every innerHTML change</td><td>Assume event listeners survive <code>innerHTML = ...</code> &mdash; they don't</td></tr>
+    <tr><td>Build server as CJS, client as ESM</td><td>Use the same module format for both &mdash; Devvit requires CJS server</td></tr>
+    <tr><td>Include fallback HTML for instant rendering</td><td>Wait for API response before showing anything &mdash; users see blank screen</td></tr>
+    <tr><td>Wrap <code>hDel</code> fields in array: <code>hDel(key, [field])</code></td><td>Pass single string &mdash; silently fails, data never deleted</td></tr>
+    <tr><td>Unwrap <code>select</code> settings: <code>Array.isArray(v) ? v[0] : v</code></td><td>Call <code>.startsWith()</code> on the result &mdash; it's an array, not a string</td></tr>
+    <tr><td>Use <code>sendPrivateMessage({ to: "/r/sub" })</code> for modmail</td><td>Use <code>sendPrivateMessage({ to: "username" })</code> &mdash; individual DMs fail in Devvit Web</td></tr>
+    <tr><td>Use <code>position: absolute</code> for full-viewport cards on iOS</td><td>Use <code>height: 100%</code> inside flex &mdash; iOS Safari resolves as <code>auto</code></td></tr>
     <tr>
       <td><strong>Custom posts are HTTP-reachable by ANY viewer</strong></td>
       <td><code>permissions.reddit.scope: "moderator"</code> is a request-token scope for what the app may call, NOT a viewer gate. Custom posts serve to anyone who can see the parent post. Always add <code>requireModerator()</code> at the handler level.</td>
@@ -357,250 +545,72 @@ function unlock(key) { delete locks[key]; }</code></pre>
   </table>
 
   <div class="warn-box" style="margin-top:16px;">
-    <div class="warn-title">> THE SNEAKIEST BUG</div>
-    <p>Redis writes can be <strong>eventually consistent</strong>. You call <code>zRem</code>, it returns 0, you panic. But the member IS removed — the read right after the write might show stale data. <strong>Trust the write. Don't verify immediately.</strong> Read again 1 second later and it'll be correct.</p>
+    <div class="warn-title">&gt; THE SNEAKIEST BUG</div>
+    <p>Redis writes can be <strong>eventually consistent</strong>. You call <code>zRem</code>, it returns 0, you panic. But the member IS removed &mdash; the read right after the write might show stale data. <strong>Trust the write. Don't verify immediately.</strong> Read again 1 second later and it'll be correct.</p>
   </div>
 
   <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> THE iOS BLACK HOLE</div>
+    <div class="note-title">&gt; THE iOS BLACK HOLE</div>
     <p>On iOS, calling <code>navigateTo(url)</code> to push to a Reddit page, then tapping Back, often shows a <strong>blank white webview</strong>. The page chrome is gone. Fix: add a <code>visibilitychange</code> listener that re-renders the active surface when the page becomes visible again. Use <strong>soft-render</strong> (re-fetch + re-render current card), not hard re-init (which wipes open overlays and form state).</p>
   </div>
 
   <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> THE CSV TRAP</div>
-    <p>When exporting data to CSV, a username starting with <code>=</code>, <code>+</code>, or <code>-</code> will be interpreted as a <strong>formula by Excel</strong> and may execute arbitrary code. Always prefix dangerous characters with a single quote: <code>'=cmd|...'</code>. Also, <strong>quote all fields</strong> — a comma in a username silently strips the comma instead of escaping it. Use RFC 4180 escaping: <code>"value"</code> with doubled inner quotes.</p>
+    <div class="warn-title">&gt; THE CSV TRAP</div>
+    <p>When exporting data to CSV, a username starting with <code>=</code>, <code>+</code>, or <code>-</code> will be interpreted as a <strong>formula by Excel</strong> and may execute arbitrary code. Always prefix dangerous characters with a single quote: <code>'=cmd|...'</code>. Also, <strong>quote all fields</strong> &mdash; a comma in a username silently strips the comma instead of escaping it. Use RFC 4180 escaping: <code>"value"</code> with doubled inner quotes.</p>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Settings API Differences</h4>
+  <div class="gotcha-box">
+    <div class="gotcha-title">! BLOCKS VS DEVVIT WEB SETTINGS</div>
+    <p><code>settings.value</code> returns empty string in Blocks version. Must use <code>reddit.settings.get()</code> in Devvit 0.12+. Settings values persist across app version updates &mdash; don't re-prompt users after version updates.</p>
+    <p><strong>Select settings return <code>string[]</code> not <code>string</code>:</strong> Unwrap with <code>Array.isArray(v) ? v[0] : v</code>. Devvit SelectField is <code>BaseField&lt;string[]&gt;</code>.</p>
+    <p><strong>Boolean settings:</strong> Handle string/boolean/array variants: <code>value === true || value === 'true'</code> or <code>Array.isArray(value) ? settingsFlag(value[0]) : value</code>.</p>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">ES Modules .js Extension</h4>
+  <div class="gotcha-box">
+    <div class="gotcha-title">! ES MODULES GOTCHA</div>
+    <p>When <code>"type": "module"</code> in package.json, must use <code>.js</code> extension in relative imports (e.g., <code>import { foo } from './bar.js'</code>), NOT <code>.ts</code>.</p>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">createAsync Must Be in User Action</h4>
+  <div class="gotcha-box">
+    <div class="gotcha-title">! createAsync TIMING</div>
+    <p><code>createAsync</code> runs async tasks on server; must call <code>onLoad</code> inside a user action (click handler), NOT on component mount. Component mount runs before Devvit SDK is ready.</p>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">reddit.distinguish Returns Undefined</h4>
+  <div class="gotcha-box">
+    <div class="gotcha-title">! DISTINGUISH GOTCHA</div>
+    <p><code>reddit.distinguish</code> returns <code>undefined</code>. Must use <code>getCommentById</code> after distinguish to get the actual distinguished comment value.</p>
+  </div>
+
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">process.env is Undefined</h4>
+  <div class="gotcha-box">
+    <div class="gotcha-title">! NO ENV VARS IN DEVVIT</div>
+    <p><code>process.env</code> is NOT available in Devvit runtime. NO <code>dotenv</code>, NO <code>.env</code> files. API keys must use Devvit settings (app-scoped secrets). External service SDKs that internally call <code>process.env.X</code> at module load time are incompatible.</p>
+<pre><code>// ❌ DOES NOT WORK
+const apiKey = process.env.OPENAI_API_KEY;
+
+// ✅ WORKS
+const apiKey = await context.settings.get&lt;string&gt;('openaiKey');</code></pre>
   </div>
 </div>
 
-<!-- SECTION 7: COMMUNITY SPOTLIGHT -->
-<div class="section" id="spotlight">
-  <div class="section-header">
-    <span class="section-num">07</span>
-    <h3>Community Spotlight</h3>
-  </div>
-  <p>Real apps built by real devs. All open source. Go steal their ideas (respectfully).</p>
-
-  <div class="warn-box">
-    <div class="warn-title">> HOT AND COLD</div>
-    <p>A daily number-guessing game with leaderboards, streaks, and 50k+ players. Built with React + Express + tRPC. <strong>Pattern to steal:</strong> Redis sorted sets for leaderboards, PostHog for analytics, tRPC for type-safe API calls from the game client.</p>
-    <p><a href="https://github.com/reddit/devvit-HotAndCold" target="_blank">github.com/reddit/devvit-HotAndCold</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> BOT BOUNCER</div>
-    <p>The most sophisticated mod tool on Devvit — detects spam accounts across 1000+ subreddits. Uses self-chaining cron jobs, sharded Redis, compressed payloads, and a wiki-based config system. <strong>Pattern to steal:</strong> Self-chaining job pattern, randomized cron minutes, ZSET queues.</p>
-    <p><a href="https://github.com/fsvreddit/bot-bouncer" target="_blank">github.com/fsvreddit/bot-bouncer</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> MODMAIL TO DISCORD/SLACK</div>
-    <p>A 160-line single-file app that forwards modmail to webhooks. Proof that useful apps don't need to be complex. <strong>Pattern to steal:</strong> URL-as-platform-discriminator, single-field multi-platform dispatch.</p>
-    <p><a href="https://github.com/ni5arga/Modmail-To-Discord-Slack" target="_blank">github.com/ni5arga/Modmail-To-Discord-Slack</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> BLOCKKIT & PIXELARY</div>
-    <p>Full Unity and HTML5 games running inside Reddit posts. Proof that Devvit can handle real games. Blokkit runs Unity WebGL. Pixelary is a draw-and-guess game. Both have thousands of daily players.</p>
-    <p><a href="https://www.reddit.com/r/Blokkit/" target="_blank">r/Blokkit</a> &middot; <a href="https://www.reddit.com/r/Pixelary/" target="_blank">r/Pixelary</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> ALBUS DUMBLEDORE</div>
-    <p>A Harry Potter quote bot that responds to "dumbledore!" in comments. Simple, charming, 61KB of quotes. Uses the modern <strong>@devvit/web trigger-as-HTTP-endpoint</strong> pattern — no <code>Devvit.addTrigger()</code>, just Hono routes mapped in devvit.json. Perfect example of a simple bot done the new way.</p>
-    <p><a href="https://github.com/overandoutnerd/albus-dunbledore" target="_blank">github.com/overandoutnerd/albus-dunbledore</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> LLMPHYSICS-BOT</div>
-    <p>Modular moderation bot with a <strong>plugin registry architecture</strong> — add a new module with one import. Uses Gemini's <code>url_context</code> trick to fetch external PDFs without Devvit HTTP permissions. Tracks everything in a shared Redis post hash used by multiple modules simultaneously.</p>
-    <p><a href="https://github.com/AllHailSeizure/llmphysics-bot" target="_blank">github.com/AllHailSeizure/llmphysics-bot</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> SPOILER SENSER</div>
-    <p>Hackathon winner that detects spoilers using a <strong>cascading analysis pipeline</strong>: fast regex heuristics first, LLM only when ambiguous. Saves 80%+ on API costs. Detects speculation language ("I think", "my theory") and confirmation language ("I watched it") to adjust risk scoring.</p>
-    <p><a href="https://github.com/arthantyo/spoilersense" target="_blank">github.com/arthantyo/spoilersense</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> REDDIT MAP (MUST-SEE)</div>
-    <p>Scans subreddit posts for venue mentions, extracts named places via OpenAI with structured JSON + bbox hallucination guards, and renders them as pins on an interactive <strong>Leaflet.js map</strong>. <strong>Offline tiles pre-downloaded at build time</strong> to bypass Devvit's CSP — brilliant hack. Comment-tree scanning finds buried recommendations. 6 city scopes with regional overlays.</p>
-    <p><a href="https://github.com/jonaaldas/reddit-map" target="_blank">github.com/jonaaldas/reddit-map</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> RAIDSHIELD</div>
-    <p>Real-time raid protection with <strong>homoglyph-normalized text fingerprinting</strong> — converts Cyrillic lookalikes (а→a, е→e) and strips zero-width characters before hashing. Uses Redis sorted set sliding windows for O(log N) velocity tracking. <strong>Fail-open design</strong>: if Redis is down, content passes through instead of blocking everyone.</p>
-    <p><a href="https://github.com/mohamdImran/raidshield" target="_blank">github.com/mohamdImran/raidshield</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> MODARBOT</div>
-    <p>Uses <strong>Devvit Realtime pub/sub</strong> as a live event bus — the only app that does. Six statistical detectors (new-account cluster, comment cascade, cross-post influx) emit anomaly events via <code>realtime.send()</code>. The React webview subscribes via <code>connectRealtime()</code> for zero-latency alerts. No polling needed.</p>
-    <p><a href="https://github.com/erenisci/modarbot" target="_blank">github.com/erenisci/modarbot</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="note-title">> MODKUDOS</div>
-    <p>Positive reinforcement engine: auto-detects quality content, rewards contributors with flair and thank-you messages. Uses <strong>idempotent reward keys</strong> with 30-day Redis TTL to prevent double-rewarding. Dynamic cron interval from settings. 195 tests including property-based testing with fast-check.</p>
-    <p><a href="https://github.com/tanDivina/mod-kudos" target="_blank">github.com/tanDivina/mod-kudos</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> APPEAL DESK</div>
-    <p>The most rigorously architected Devvit app: <strong>clean architecture core</strong> with zero Devvit imports, thin runtime shell as adapter. Uses <strong>Redis WATCH/MULTI/EXEC CAS</strong> for optimistic concurrency with 5-retry bounded loops. 100% test coverage on core. AI is a first-class no-op — the app is complete without it.</p>
-    <p><a href="https://github.com/vsenthil7/appeal-desk" target="_blank">github.com/vsenthil7/appeal-desk</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> HIVEMIND DEFENCE</div>
-    <p>Cleverest workaround for Devvit's per-installation Redis silo: uses <strong>structured Reddit comments as a distributed ledger</strong>. Nodes post <code>[SIGNAL]</code>/<code>[DISMISS]</code> comments to a pinned hub post. HMAC-SHA256 identity protection prevents rainbow-table reversal. Graduated response: 1 flag=watch, 2=elevate, 3+=queue. Never auto-bans.</p>
-    <p><a href="https://github.com/GauravS11112003/HiveMind-Defence" target="_blank">github.com/GauravS11112003/HiveMind-Defence</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> DEFCON RED (Official Reddit)</div>
-    <p>Presidential crisis simulator — <strong>declarative scenario DSL</strong> + deterministic game loop + optional Gemini AI dialogue. Each game state is typed JSON, the engine evaluates player choices deterministically. Official Reddit example showing how to build complex narrative games on Devvit Web.</p>
-    <p><a href="https://github.com/reddit/devvit-defcon-red-game" target="_blank">github.com/reddit/devvit-defcon-red-game</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> CONTEXTMOD (Hackathon Winner)</div>
-    <p>JSON5 rule engine for content moderation with <strong>live telemetry dashboard, dry-run rule tester, and AI explainer</strong>. Ported from PRAW-era to Devvit Web. The four-tier safety gate pattern (global gate → dry run → action disabled → action dry run → FIRE) is a must-study architecture for mod tools.</p>
-    <p><a href="https://github.com/StephenSook/context-mod-devvit" target="_blank">github.com/StephenSook/context-mod-devvit</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> MODPULSE</div>
-    <p>Real-time community health monitoring dashboard. <strong>Zero polling architecture</strong> — purely event-driven using Devvit triggers (<code>PostSubmit</code>, <code>PostReport</code>, <code>CommentSubmit</code>). Weekly digests via Modmail. React dashboard via WebView. No CRON needed.</p>
-    <p><a href="https://github.com/AstaadDahiya/ModPulse" target="_blank">github.com/AstaadDahiya/ModPulse</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> DEVVIT-STATE (New Library)</div>
-    <p>Atomic, versioned state sync for Devvit apps. Uses <strong>Redis transactions + strict versioning + Zod schemas + Devvit Realtime</strong> for server-authoritative state with automatic client sync. Published as <code>devvit-state</code> on npm (v0.3.0).</p>
-    <p><a href="https://github.com/foreverest/devvit-state" target="_blank">github.com/foreverest/devvit-state</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> OVER9000GAMES</div>
-    <p>An AI-powered NES game generator that runs user-created JavaScript inside a <strong>QuickJS sandbox</strong> — both in the browser (async WASM) and on the server (sync CJS variant). Generates games via OpenAI Responses API, renders them in a 128x128 pixel console with 8-slot audio. <strong>Pattern to steal:</strong> Dual QuickJS environments, ESM loader hook testbed for local development, client-driven polling (no background workers).</p>
-    <p><a href="https://github.com/Strawberry-Computer/over9000games" target="_blank">github.com/Strawberry-Computer/over9000games</a></p>
-  </div>
-
-  <div class="note-box" style="margin-top:12px;">
-    <div class="note-title">> SNOOSINGS</div>
-    <p>A networked drum machine / concert game where <strong>only 8.5% of the code touches Devvit</strong> (174 lines). The rest is pure TypeScript/Canvas/WebAudio. Uses <strong>post-scoped Realtime channels</strong> with throttled peer updates (300ms), 9s heartbeat, 30s disconnect timeout. <strong>Pattern to steal:</strong> Minimal Devvit surface area — keep game logic in a standard iframe, use Devvit only for auth + Realtime transport.</p>
-    <p><a href="https://github.com/reddit/devvit-snoosings" target="_blank">github.com/reddit/devvit-snoosings</a></p>
-  </div>
-
-  <div class="warn-box" style="margin-top:12px;">
-    <div class="warn-title">> FIDDLESTICKS</div>
-    <p>A golf game using <strong>lit-html + Custom Elements</strong> instead of React. Built with esbuild-only (no webpack/vite), uses Constructable Stylesheets for CSS, seeded Park-Miller PRNG for deterministic boards, and SAT collision detection. <strong>Pattern to steal:</strong> lit-html is a lighter alternative to React for game webviews — smaller bundle, no JSX, no virtual DOM. The entire Devvit surface is only 672 lines.</p>
-    <p><a href="https://github.com/reddit/devvit-fiddlesticks" target="_blank">github.com/reddit/devvit-fiddlesticks</a></p>
-  </div>
-
-  <div class="spotlight-entry" id="spotlight-cm">
-    <div class="spotlight-tag">🔧 Moderator Tool</div>
-    <div class="spotlight-title">context-mod-devvit</div>
-    <div class="spotlight-desc">
-      Devvit Web port of FoxxMD's ContextMod rule-engine moderation bot. JSON5 rules in your sub's wiki, 8 rule kinds (regex, author, history, attribution, recentActivity, repost, imageRepost, ruleSet), 8 action handlers (remove/approve/lock/comment/report/ban/userFlair/distinguish), perceptual-blockhash image-repost detection, AI rule explainer with 7-gate defense chain (auth → validate → circuit breaker → per-sub rate limit → per-user rate limit → cache → OpenAI), dry-run rule tester, Observatory dashboard with live telemetry. Hono routing, 3-tier idempotency (firstSeen/reserveAction/commitAction), FNV-1a64 hashing, wiki config publish with immutable revisions + atomic pointer bump. 828 tests, CI green across 8 jobs. Hackathon 2026 entry.
-    </div>
-  </div>
-
-  <div class="spotlight-entry" id="spotlight-ai-mod-suite">
-    <div class="spotlight-tag">🤖 AI All-in-One</div>
-    <div class="spotlight-title">ai-mod-suite-devvit</div>
-    <div class="spotlight-desc">
-      Swiss-army-knife AI mod tool for Devvit. AI rule enforcement with violation detection, TLDR summaries for long posts/comments, discussion summaries at comment milestones (20/50/100), AI summons response, conversational replies with cooldown+daily-limit, flair system with milestone tiers + AI specialist role classification, troll alerts via modmail with local score analysis. Dual LLM support (Google Gemini + OpenAI), safe mode on by default with audit logging, esbuild bundling (no Vite), settings validation endpoints for API keys.
-    </div>
-  </div>
-
-  <div class="spotlight-entry" id="spotlight-devvit-state">
-    <div class="spotlight-tag">📦 Library</div>
-    <div class="spotlight-title">devvit-state</div>
-    <div class="spotlight-desc">
-      Atomic, versioned state sync library for Devvit apps. Zod-typed JSON state with Redis WATCH/MULTI/EXEC transactions, strict versioning, JSON Patch diffs (not full snapshots), bounded update replay, and Devvit Realtime broadcasts. Optimistic concurrency with up to 5 retries on transaction conflict. Client subscribes to Realtime fast path, recovers missed updates via getUpdatesSince, falls back to full snapshot. Reusable across any Devvit Web app.
-    </div>
-  </div>
-
-  <div class="spotlight-entry" id="spotlight-shadow-mod">
-    <div class="spotlight-tag">🎓 Mod Training</div>
-    <div class="spotlight-title">shadow-mod</div>
-    <div class="spotlight-desc">
-      Structured mod training via blind review. Observers record decisions without executing them, Reviewers assess the same posts independently, and a Comparison report lands after the real mod action — with reasoning from both. Uses Devvit 0.13.0, Hono, Zod validation, pnpm, Vitest. Designed for training new moderators without risk.
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- SECTION 8: BLOCKS MIGRATION -->
-<div class="section" id="migration">
-  <div class="section-header">
-    <span class="section-num">08</span>
-    <h3>⚠️ Blocks Migration (Urgent)</h3>
-  </div>
-
-  <p><strong>Blocks UI is END OF LIFE.</strong> Removed from <code>@devvit/public-api</code> in v0.13.0. Support drops from all Reddit clients <strong>June 30, 2026</strong>. If you have an existing Blocks app, you must migrate before then.</p>
-
-  <div class="warn-box">
-    <div class="warn-title">> WHAT CHANGED</div>
-    <table class="pixel-table" style="margin:12px 0;font-size:0.75rem;">
-      <tr><th>Old (Blocks)</th><th>New (Devvit Web)</th></tr>
-      <tr><td><code>Devvit.addCustomPostType()</code></td><td><code>devvit.json</code> entrypoints</td></tr>
-      <tr><td><code>useWebView()</code> + <code>postMessage</code></td><td><code>fetch('/api/...')</code> HTTP calls</td></tr>
-      <tr><td><code>Devvit.addMenuItem({onPress})</code></td><td><code>devvit.json</code> menu + HTTP endpoints</td></tr>
-      <tr><td><code>useChannel()</code> / <code>realtime</code></td><td><code>@devvit/web/server</code> Realtime only</td></tr>
-      <tr><td><code>Context.kvStore</code></td><td><code>redis.get/set</code> directly</td></tr>
-      <tr><td><code>@devvit/payments</code></td><td>Web-only payments via devvit.json</td></tr>
-    </table>
-  </div>
-
-  <div class="note-box">
-    <div class="note-title">> BLOCKS MIGRATION STEPS</div>
-    <p><strong>1.</strong> Create new app with <code>devvit-cli init</code> &rarr; select "React" template</p>
-    <p><strong>2.</strong> Move server logic to <code>src/server/</code> with Hono/Express routes</p>
-    <p><strong>3.</strong> Move UI to <code>src/client/</code> with React + Tailwind</p>
-    <p><strong>4.</strong> Replace <code>Devvit.addTrigger()</code> with <code>devvit.json</code> trigger config + HTTP endpoints</p>
-    <p><strong>5.</strong> Replace <code>postMessage</code> with <code>fetch('/api/...')</code></p>
-    <p><strong>6.</strong> Test on mobile AND desktop before June 30!</p>
-  </div>
-</div>
-
-<!-- SECTION 9: WHAT'S NEXT -->
-<div class="section" id="next">
-  <div class="section-header">
-    <span class="section-num">09</span>
-    <h3>What's Next?</h3>
-  </div>
-
-  <p>You now know enough to build something real. Here's your launch sequence:</p>
-
-  <p><strong>⚠️ Reminder:</strong> <strong>Blocks UI is dead.</strong> Support ends June 30, 2026. Use <code>@devvit/web</code> for ALL new apps. If you have an old Blocks app, <a href="#migration">migrate now</a>.</p>
-
-  <p><strong>1. Pick an idea.</strong> Start small. A bot that forwards modmail to Discord. A daily thread creator. A simple leaderboard game. Ship something in a weekend.</p>
-
-  <p><strong>2. Use the skills file.</strong> The <code>skills.md</code> file in this repo is your AI agent's reference manual (40+ repos analyzed). Feed it to opencode, Claude Code, or Cursor. It contains every pattern, gotcha, and code template you'll need. Your AI assistant becomes a Devvit expert instantly.</p>
-
-  <p><strong>3. Join the community.</strong> The <a href="https://www.reddit.com/r/devvit/" target="_blank">r/devvit</a> subreddit and the <a href="https://developers.reddit.com/discord" target="_blank">Devvit Discord</a> are full of devs who've shipped. They'll help you debug, review your code, and celebrate your launch.</p>
-
-  <p><strong>4. Design with Stitch.</strong> Use Google Stitch (integrated with opencode) to generate pixel-perfect UIs. Describe what you want — "a game dashboard with neon header and card layout" — and Stitch builds the HTML/CSS. Drop it into your project.</p>
-
-  <p><strong>5. Publish and earn.</strong> When your app is ready, <code>npx devvit publish</code> submits it for review. Once approved, mods can install it. If it gets engagement, you might qualify for the <strong>Reddit Developer Fund</strong> (up to $167k per app).</p>
-
-  <p><strong>6. Go through the production checklist.</strong> Before you publish, run through the <a href="#production">Going to Production</a> checklist — it covers every gotcha, security check, and common issue that trips up first-time releases.</p>
-
-  <div class="note-box" style="margin-top:20px;">
-    <div class="note-title">> REMEMBER</div>
-    <p>Every advanced Devvit developer started exactly where you are now. The only difference is they shipped. So ship something. Even if it's tiny. Even if it's ugly. <strong>Put code on Reddit and see what happens.</strong></p>
-  </div>
-</div>
-
+<!-- ============================================
+     SECTION 07: PRODUCTION CHECKLIST
+     ============================================ -->
 <div class="section" id="production">
   <div class="section-header">
-    <span class="section-num">10</span>
-    <h3>Going to Production</h3>
+    <span class="section-num">07</span>
+    <h3>Production Checklist</h3>
   </div>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>Checklist before you publish &mdash; don't skip this.</p>
+  </div>
+
   <p>Building is half the battle. Here's the checklist to go from <code>npm run dev</code> to a live app on Reddit.</p>
 
   <div class="gotcha-box">
@@ -609,7 +619,7 @@ function unlock(key) { delete locks[key]; }</code></pre>
     <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
       <li>No <code>console.log</code> in client code (doesn't surface in Devvit Web anyway)</li>
       <li>Server logs use structured prefixes: <code>[FEATURE] action | key=value</code></li>
-      <li>No hardcoded secrets — use <code>context.settings.get()</code> for all config</li>
+      <li>No hardcoded secrets &mdash; use <code>context.settings.get()</code> for all config</li>
       <li>No empty string Redis keys (reject with 401 if <code>context.username</code> is empty)</li>
     </ul>
     <p><strong>Security:</strong></p>
@@ -617,11 +627,11 @@ function unlock(key) { delete locks[key]; }</code></pre>
       <li>PII cleanup on leave/delete (Redis doesn't auto-expire)</li>
       <li>CSV export has formula injection prevention</li>
       <li>Mod-only features gated with <code>requireModerator()</code></li>
-      <li>No email/phone in public views — Mod Dashboard only</li>
+      <li>No email/phone in public views &mdash; Mod Dashboard only</li>
     </ul>
     <p><strong>Devvit Web:</strong></p>
     <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
-      <li>Using <code>@devvit/web</code> (NOT <code>@devvit/public-api</code> — Blocks removed v0.13)</li>
+      <li>Using <code>@devvit/web</code> (NOT <code>@devvit/public-api</code> &mdash; Blocks removed v0.13)</li>
       <li>All SDK calls use <code>await</code> (including <code>getCurrentUser</code>)</li>
       <li><code>createAsync</code> called in user action handlers, NOT on mount</li>
       <li>Forms use <code>showForm()</code> from <code>@devvit/web/client</code></li>
@@ -630,9 +640,9 @@ function unlock(key) { delete locks[key]; }</code></pre>
     <p><strong>Redis:</strong></p>
     <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
       <li>No <code>incr</code> inside MULTI/EXEC (silently fails)</li>
-      <li>Large hashes use <code>hScan</code> (not <code>hGetAll</code> — ~128 field limit)</li>
+      <li>Large hashes use <code>hScan</code> (not <code>hGetAll</code> &mdash; ~128 field limit)</li>
       <li>TTL set on all ephemeral data</li>
-      <li>Race conditions handled with WATCH→MULTI→EXEC retry loop</li>
+      <li>Race conditions handled with WATCH&rarr;MULTI&rarr;EXEC retry loop</li>
     </ul>
     <p><strong>UI/UX:</strong></p>
     <ul style="margin:8px 0 16px 20px; color: var(--accent2); font-size: 14px; line-height: 1.8;">
@@ -650,12 +660,12 @@ function unlock(key) { delete locks[key]; }</code></pre>
     </ul>
   </div>
 
-  <p style="margin-top: 20px;"><strong>Upload & Publish:</strong></p>
+  <p style="margin-top: 20px;"><strong>Upload &amp; Publish:</strong></p>
   <div class="step-list">
     <div class="step"><span class="step-num">1</span> Upload (private): <code>npx devvit upload --bump patch</code></div>
     <div class="step"><span class="step-num">2</span> Test on dev subreddit: <code>npx devvit logs r/your_test_sub</code></div>
     <div class="step"><span class="step-num">3</span> Submit for review: <code>npx devvit publish --bump minor</code></div>
-    <div class="step"><span class="step-num">4</span> After approval — install: <code>npx devvit install r/target_sub</code></div>
+    <div class="step"><span class="step-num">4</span> After approval &mdash; install: <code>npx devvit install r/target_sub</code></div>
   </div>
 
   <div class="gotcha-box" style="margin-top: 20px;">
@@ -682,6 +692,262 @@ function unlock(key) { delete locks[key]; }</code></pre>
       <tr><td style="padding: 8px 12px; color: var(--accent2);">Double-fires on click</td><td style="padding: 8px 12px;">Use ONLY <code>data-action</code> delegation, no direct listeners</td></tr>
     </tbody>
   </table>
+</div>
+
+<!-- ============================================
+     SECTION 08: BLOCKS MIGRATION
+     ============================================ -->
+<div class="section" id="migration">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h3>Blocks Migration</h3>
+  </div>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>Blocks is dead June 30, 2026 &mdash; migrate now.</p>
+  </div>
+
+  <p><strong>Blocks UI is END OF LIFE.</strong> Removed from <code>@devvit/public-api</code> in v0.13.0. Support drops from all Reddit clients <strong>June 30, 2026</strong>. If you have an existing Blocks app, you must migrate before then.</p>
+
+  <div class="warn-box">
+    <div class="warn-title">&gt; WHAT CHANGED</div>
+    <table class="pixel-table" style="margin:12px 0;font-size:0.75rem;">
+      <tr><th>Old (Blocks)</th><th>New (Devvit Web)</th></tr>
+      <tr><td><code>Devvit.addCustomPostType()</code></td><td><code>devvit.json</code> entrypoints</td></tr>
+      <tr><td><code>useWebView()</code> + <code>postMessage</code></td><td><code>fetch('/api/...')</code> HTTP calls</td></tr>
+      <tr><td><code>Devvit.addMenuItem({onPress})</code></td><td><code>devvit.json</code> menu + HTTP endpoints</td></tr>
+      <tr><td><code>useChannel()</code> / <code>realtime</code></td><td><code>@devvit/web/server</code> Realtime only</td></tr>
+      <tr><td><code>Context.kvStore</code></td><td><code>redis.get/set</code> directly</td></tr>
+      <tr><td><code>@devvit/payments</code></td><td>Web-only payments via devvit.json</td></tr>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <div class="note-title">&gt; BLOCKS MIGRATION STEPS</div>
+    <p><strong>1.</strong> Create new app with <code>devvit-cli init</code> &rarr; select "React" template</p>
+    <p><strong>2.</strong> Move server logic to <code>src/server/</code> with Hono/Express routes</p>
+    <p><strong>3.</strong> Move UI to <code>src/client/</code> with React + Tailwind</p>
+    <p><strong>4.</strong> Replace <code>Devvit.addTrigger()</code> with <code>devvit.json</code> trigger config + HTTP endpoints</p>
+    <p><strong>5.</strong> Replace <code>postMessage</code> with <code>fetch('/api/...')</code></p>
+    <p><strong>6.</strong> Test on mobile AND desktop before June 30!</p>
+  </div>
+</div>
+
+<!-- ============================================
+     SECTION 09: COMMUNITY SPOTLIGHT
+     ============================================ -->
+<div class="section" id="spotlight">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <h3>Community Spotlight</h3>
+  </div>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>20+ open source apps to learn from.</p>
+  </div>
+
+  <p>Real apps built by real devs. All open source. Go steal their ideas (respectfully).</p>
+
+  <!-- GAMES -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Games</h4>
+
+  <div class="warn-box">
+    <div class="warn-title">&gt; HOT AND COLD</div>
+    <p>A daily number-guessing game with leaderboards, streaks, and 50k+ players. Built with React + Express + tRPC. <strong>Pattern to steal:</strong> Redis sorted sets for leaderboards, PostHog for analytics, tRPC for type-safe API calls from the game client.</p>
+    <p><a href="https://github.com/reddit/devvit-HotAndCold" target="_blank">github.com/reddit/devvit-HotAndCold</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; OVER9000GAMES</div>
+    <p>An AI-powered NES game generator that runs user-created JavaScript inside a <strong>QuickJS sandbox</strong> &mdash; both in the browser (async WASM) and on the server (sync CJS variant). Generates games via OpenAI Responses API, renders them in a 128x128 pixel console with 8-slot audio. <strong>Pattern to steal:</strong> Dual QuickJS environments, ESM loader hook testbed for local development, client-driven polling (no background workers).</p>
+    <p><a href="https://github.com/Strawberry-Computer/over9000games" target="_blank">github.com/Strawberry-Computer/over9000games</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; BLOKKIT &amp; PIXELARY</div>
+    <p>Full Unity and HTML5 games running inside Reddit posts. Proof that Devvit can handle real games. Blokkit runs Unity WebGL. Pixelary is a draw-and-guess game. Both have thousands of daily players.</p>
+    <p><a href="https://www.reddit.com/r/Blokkit/" target="_blank">r/Blokkit</a> &middot; <a href="https://www.reddit.com/r/Pixelary/" target="_blank">r/Pixelary</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; SNOOSINGS</div>
+    <p>A networked drum machine / concert game where <strong>only 8.5% of the code touches Devvit</strong> (174 lines). The rest is pure TypeScript/Canvas/WebAudio. Uses <strong>post-scoped Realtime channels</strong> with throttled peer updates (300ms), 9s heartbeat, 30s disconnect timeout. <strong>Pattern to steal:</strong> Minimal Devvit surface area &mdash; keep game logic in a standard iframe, use Devvit only for auth + Realtime transport.</p>
+    <p><a href="https://github.com/reddit/devvit-snoosings" target="_blank">github.com/reddit/devvit-snoosings</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; FIDDLESTICKS</div>
+    <p>A golf game using <strong>lit-html + Custom Elements</strong> instead of React. Built with esbuild-only (no webpack/vite), uses Constructable Stylesheets for CSS, seeded Park-Miller PRNG for deterministic boards, and SAT collision detection. <strong>Pattern to steal:</strong> lit-html is a lighter alternative to React for game webviews &mdash; smaller bundle, no JSX, no virtual DOM. The entire Devvit surface is only 672 lines.</p>
+    <p><a href="https://github.com/reddit/devvit-fiddlesticks" target="_blank">github.com/reddit/devvit-fiddlesticks</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; DEFCON RED (Official Reddit)</div>
+    <p>Presidential crisis simulator &mdash; <strong>declarative scenario DSL</strong> + deterministic game loop + optional Gemini AI dialogue. Each game state is typed JSON, the engine evaluates player choices deterministically. Official Reddit example showing how to build complex narrative games on Devvit Web.</p>
+    <p><a href="https://github.com/reddit/devvit-defcon-red-game" target="_blank">github.com/reddit/devvit-defcon-red-game</a></p>
+  </div>
+
+  <!-- MOD TOOLS -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Mod Tools</h4>
+
+  <div class="note-box">
+    <div class="note-title">&gt; BOT BOUNCER</div>
+    <p>The most sophisticated mod tool on Devvit &mdash; detects spam accounts across 1000+ subreddits. Uses self-chaining cron jobs, sharded Redis, compressed payloads, and a wiki-based config system. <strong>Pattern to steal:</strong> Self-chaining job pattern, randomized cron minutes, ZSET queues.</p>
+    <p><a href="https://github.com/fsvreddit/bot-bouncer" target="_blank">github.com/fsvreddit/bot-bouncer</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; CONTEXTMOD (Hackathon Winner)</div>
+    <p>JSON5 rule engine for content moderation with <strong>live telemetry dashboard, dry-run rule tester, and AI explainer</strong>. Ported from PRAW-era to Devvit Web. The four-tier safety gate pattern (global gate &rarr; dry run &rarr; action disabled &rarr; action dry run &rarr; FIRE) is a must-study architecture for mod tools.</p>
+    <p><a href="https://github.com/StephenSook/context-mod-devvit" target="_blank">github.com/StephenSook/context-mod-devvit</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; AI MOD SUITE</div>
+    <p>Swiss-army-knife AI mod tool for Devvit. AI rule enforcement with violation detection, TLDR summaries for long posts/comments, discussion summaries at comment milestones (20/50/100), AI summons response, conversational replies with cooldown+daily-limit, flair system with milestone tiers + AI specialist role classification, troll alerts via modmail with local score analysis. Dual LLM support (Google Gemini + OpenAI), safe mode on by default with audit logging.</p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; RAIDSHIELD</div>
+    <p>Real-time raid protection with <strong>homoglyph-normalized text fingerprinting</strong> &mdash; converts Cyrillic lookalikes (&agrave;&rarr;a, &ecaron;&rarr;e) and strips zero-width characters before hashing. Uses Redis sorted set sliding windows for O(log N) velocity tracking. <strong>Fail-open design</strong>: if Redis is down, content passes through instead of blocking everyone.</p>
+    <p><a href="https://github.com/mohamdImran/raidshield" target="_blank">github.com/mohamdImran/raidshield</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; MODARBOT</div>
+    <p>Uses <strong>Devvit Realtime pub/sub</strong> as a live event bus &mdash; the only app that does. Six statistical detectors (new-account cluster, comment cascade, cross-post influx) emit anomaly events via <code>realtime.send()</code>. The React webview subscribes via <code>connectRealtime()</code> for zero-latency alerts. No polling needed.</p>
+    <p><a href="https://github.com/erenisci/modarbot" target="_blank">github.com/erenisci/modarbot</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; MODKUDOS</div>
+    <p>Positive reinforcement engine: auto-detects quality content, rewards contributors with flair and thank-you messages. Uses <strong>idempotent reward keys</strong> with 30-day Redis TTL to prevent double-rewarding. Dynamic cron interval from settings. 195 tests including property-based testing with fast-check.</p>
+    <p><a href="https://github.com/tanDivina/mod-kudos" target="_blank">github.com/tanDivina/mod-kudos</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; APPEAL DESK</div>
+    <p>The most rigorously architected Devvit app: <strong>clean architecture core</strong> with zero Devvit imports, thin runtime shell as adapter. Uses <strong>Redis WATCH/MULTI/EXEC CAS</strong> for optimistic concurrency with 5-retry bounded loops. 100% test coverage on core. AI is a first-class no-op &mdash; the app is complete without it.</p>
+    <p><a href="https://github.com/vsenthil7/appeal-desk" target="_blank">github.com/vsenthil7/appeal-desk</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; HIVEMIND DEFENCE</div>
+    <p>Cleverest workaround for Devvit's per-installation Redis silo: uses <strong>structured Reddit comments as a distributed ledger</strong>. Nodes post <code>[SIGNAL]</code>/<code>[DISMISS]</code> comments to a pinned hub post. HMAC-SHA256 identity protection prevents rainbow-table reversal. Graduated response: 1 flag=watch, 2=elevate, 3+=queue. Never auto-bans.</p>
+    <p><a href="https://github.com/GauravS11112003/HiveMind-Defence" target="_blank">github.com/GauravS11112003/HiveMind-Defence</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; SHADOW MOD</div>
+    <p>Structured mod training via blind review. Observers record decisions without executing them, Reviewers assess the same posts independently, and a Comparison report lands after the real mod action &mdash; with reasoning from both. Uses Devvit 0.13.0, Hono, Zod validation, pnpm, Vitest. Designed for training new moderators without risk.</p>
+    <p><a href="https://github.com/earlgreylabs/shadow-mod" target="_blank">github.com/earlgreylabs/shadow-mod</a></p>
+  </div>
+
+  <!-- COMMUNITY APPS -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Community Apps</h4>
+
+  <div class="note-box">
+    <div class="note-title">&gt; REDDIT MAP (MUST-SEE)</div>
+    <p>Scans subreddit posts for venue mentions, extracts named places via OpenAI with structured JSON + bbox hallucination guards, and renders them as pins on an interactive <strong>Leaflet.js map</strong>. <strong>Offline tiles pre-downloaded at build time</strong> to bypass Devvit's CSP &mdash; brilliant hack. Comment-tree scanning finds buried recommendations. 6 city scopes with regional overlays.</p>
+    <p><a href="https://github.com/jonaaldas/reddit-map" target="_blank">github.com/jonaaldas/reddit-map</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; SPOILER SENSER</div>
+    <p>Hackathon winner that detects spoilers using a <strong>cascading analysis pipeline</strong>: fast regex heuristics first, LLM only when ambiguous. Saves 80%+ on API costs. Detects speculation language ("I think", "my theory") and confirmation language ("I watched it") to adjust risk scoring.</p>
+    <p><a href="https://github.com/arthantyo/spoilersense" target="_blank">github.com/arthantyo/spoilersense</a></p>
+  </div>
+
+  <div class="note-box" style="margin-top:12px;">
+    <div class="note-title">&gt; MODPULSE</div>
+    <p>Real-time community health monitoring dashboard. <strong>Zero polling architecture</strong> &mdash; purely event-driven using Devvit triggers (<code>PostSubmit</code>, <code>PostReport</code>, <code>CommentSubmit</code>). Weekly digests via Modmail. React dashboard via WebView. No CRON needed.</p>
+    <p><a href="https://github.com/AstaadDahiya/ModPulse" target="_blank">github.com/AstaadDahiya/ModPulse</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; MODMAIL TO DISCORD/SLACK</div>
+    <p>A 160-line single-file app that forwards modmail to webhooks. Proof that useful apps don't need to be complex. <strong>Pattern to steal:</strong> URL-as-platform-discriminator, single-field multi-platform dispatch.</p>
+    <p><a href="https://github.com/ni5arga/Modmail-To-Discord-Slack" target="_blank">github.com/ni5arga/Modmail-To-Discord-Slack</a></p>
+  </div>
+
+  <!-- LIBRARIES -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Libraries</h4>
+
+  <div class="warn-box">
+    <div class="warn-title">&gt; DEVVIT-STATE</div>
+    <p>Atomic, versioned state sync for Devvit apps. Uses <strong>Redis transactions + strict versioning + Zod schemas + Devvit Realtime</strong> for server-authoritative state with automatic client sync. Published as <code>devvit-state</code> on npm (v0.3.0).</p>
+    <p><a href="https://github.com/foreverest/devvit-state" target="_blank">github.com/foreverest/devvit-state</a></p>
+  </div>
+
+  <!-- BOTS -->
+  <h4 style="font-family:var(--pixel-font);font-size:0.5rem;color:var(--gold);margin:20px 0 8px;">Bots</h4>
+
+  <div class="note-box">
+    <div class="note-title">&gt; ALBUS DUMBLEDORE</div>
+    <p>A Harry Potter quote bot that responds to "dumbledore!" in comments. Simple, charming, 61KB of quotes. Uses the modern <strong>@devvit/web trigger-as-HTTP-endpoint</strong> pattern &mdash; no <code>Devvit.addTrigger()</code>, just Hono routes mapped in devvit.json. Perfect example of a simple bot done the new way.</p>
+    <p><a href="https://github.com/overandoutnerd/albus-dunbledore" target="_blank">github.com/overandoutnerd/albus-dunbledore</a></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:12px;">
+    <div class="warn-title">&gt; LLMPHYSICS-BOT</div>
+    <p>Modular moderation bot with a <strong>plugin registry architecture</strong> &mdash; add a new module with one import. Uses Gemini's <code>url_context</code> trick to fetch external PDFs without Devvit HTTP permissions. Tracks everything in a shared Redis post hash used by multiple modules simultaneously.</p>
+    <p><a href="https://github.com/AllHailSeizure/llmphysics-bot" target="_blank">github.com/AllHailSeizure/llmphysics-bot</a></p>
+  </div>
+</div>
+
+<!-- ============================================
+     SECTION 10: RESOURCES & NEXT STEPS
+     ============================================ -->
+<div class="section" id="next">
+  <div class="section-header">
+    <span class="section-num">10</span>
+    <h3>Resources &amp; Next Steps</h3>
+  </div>
+
+  <div class="note-box" style="margin-bottom:20px;">
+    <div class="note-title">&gt; TL;DR</div>
+    <p>You know enough &mdash; now ship something.</p>
+  </div>
+
+  <p>You now know enough to build something real. Here's your launch sequence:</p>
+
+  <p><strong>1. Pick an idea.</strong> Start small. A bot that forwards modmail to Discord. A daily thread creator. A simple leaderboard game. Ship something in a weekend.</p>
+
+  <p><strong>2. Use the skills file.</strong> The <code>skills.md</code> file in this repo is your AI agent's reference manual (40+ repos analyzed). Feed it to opencode, Claude Code, or Cursor. It contains every pattern, gotcha, and code template you'll need. Your AI assistant becomes a Devvit expert instantly.</p>
+
+  <p><strong>3. Join the community.</strong> The <a href="https://www.reddit.com/r/devvit/" target="_blank">r/devvit</a> subreddit and the <a href="https://developers.reddit.com/discord" target="_blank">Devvit Discord</a> are full of devs who've shipped. They'll help you debug, review your code, and celebrate your launch.</p>
+
+  <p><strong>4. Design with Stitch.</strong> Use Google Stitch (integrated with opencode) to generate pixel-perfect UIs. Describe what you want &mdash; "a game dashboard with neon header and card layout" &mdash; and Stitch builds the HTML/CSS. Drop it into your project.</p>
+
+  <p><strong>5. Publish and earn.</strong> When your app is ready, <code>npx devvit publish</code> submits it for review. Once approved, mods can install it. If it gets engagement, you might qualify for the <strong>Reddit Developer Fund</strong> (up to $167k per app).</p>
+
+  <p><strong>6. Go through the production checklist.</strong> Before you publish, run through the <a href="#production">Production Checklist</a> &mdash; it covers every gotcha, security check, and common issue that trips up first-time releases.</p>
+
+  <div class="warn-box" style="margin-top:20px;">
+    <div class="warn-title">&gt; REDDIT DEVELOPER FUND</div>
+    <p>Reddit pays developers through the Developer Fund &mdash; up to <strong>$167,000 per app</strong> based on engagement. If your app gets traction, you can earn real money. Apps are evaluated on usage, retention, and community impact.</p>
+  </div>
+
+  <div class="note-box" style="margin-top:20px;">
+    <div class="note-title">&gt; REMEMBER</div>
+    <p>Every advanced Devvit developer started exactly where you are now. The only difference is they shipped. So ship something. Even if it's tiny. Even if it's ugly. <strong>Put code on Reddit and see what happens.</strong></p>
+  </div>
+
+  <div class="warn-box" style="margin-top:16px;">
+    <div class="warn-title">&gt; WARNING</div>
+    <p><strong>Blocks UI is dead.</strong> Support ends June 30, 2026. Use <code>@devvit/web</code> for ALL new apps. If you have an old Blocks app, <a href="#migration">migrate now</a>.</p>
+  </div>
+
+  <div class="note-box" style="margin-top:16px;">
+    <div class="note-title">&gt; LINKS</div>
+    <p><strong>r/devvit:</strong> <a href="https://www.reddit.com/r/devvit/" target="_blank">reddit.com/r/devvit</a></p>
+    <p><strong>Devvit Discord:</strong> <a href="https://developers.reddit.com/discord" target="_blank">developers.reddit.com/discord</a></p>
+    <p><strong>skills.md:</strong> <a href="skills.md">skills.md</a> &mdash; AI agent reference manual (40+ repos analyzed)</p>
+    <p><strong>GitHub:</strong> <a href="https://github.com/darelphilipo/devvit-for-noobs">github.com/darelphilipo/devvit-for-noobs</a></p>
+    <p><strong>Dev Portal:</strong> <a href="https://developers.reddit.com/apps" target="_blank">developers.reddit.com/apps</a></p>
+  </div>
 </div>
 
 <!-- FOOTER -->
