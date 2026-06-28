@@ -1,6 +1,6 @@
 # Devvit for Noobs
 
-A retro 8-bit pixel art guide to building apps on Reddit's Devvit platform. Built for humans (and their AI coding agents).
+A guide to building apps on Reddit's Devvit platform. Built for humans (and their AI coding agents).
 
 > **40+ repos analyzed. Battle-tested patterns extracted. One reference to rule them all.**
 
